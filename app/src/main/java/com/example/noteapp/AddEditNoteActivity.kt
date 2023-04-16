@@ -60,6 +60,7 @@ class AddEditNoteActivity : AppCompatActivity() {
         //mEditor.setBackground("https://raw.githubusercontent.com/wasabeef/art/master/chip.jpg");
         //mEditor.setBackground("https://raw.githubusercontent.com/wasabeef/art/master/chip.jpg");
         noteEdt.setPlaceholder("Insert text here...")
+        noteEdt.settings.allowFileAccess = true;
         //mEditor.setInputEnabled(false);
 
         //mEditor.setInputEnabled(false);
