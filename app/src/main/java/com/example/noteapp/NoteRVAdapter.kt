@@ -1,6 +1,5 @@
 package com.example.noteapp
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,8 +8,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.noteapp.Model.Note
 
-class NoteRVAdapter(val context: Context, val noteClickDeleteInterface: NoteClickDeleteInterface,
-                    val noteClickInterface: NoteClickInterface):
+class NoteRVAdapter(
+    private val noteClickDeleteInterface: NoteClickDeleteInterface,
+    private val noteClickInterface: NoteClickInterface
+):
     RecyclerView.Adapter<NoteRVAdapter.ViewHolder>()
 {
     // on below line we are creating a
@@ -21,9 +22,9 @@ class NoteRVAdapter(val context: Context, val noteClickDeleteInterface: NoteClic
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         // on below line we are creating an initializing all our
         // variables which we have added in layout file.
-        val noteTV = itemView.findViewById<TextView>(R.id.idTVNote)
-        val dateTV = itemView.findViewById<TextView>(R.id.idTVDate)
-        val deleteIV = itemView.findViewById<ImageView>(R.id.idIVDelete)
+        val noteTV: TextView = itemView.findViewById<TextView>(R.id.idTVNote)
+        val dateTV: TextView = itemView.findViewById<TextView>(R.id.idTVDate)
+        val deleteIV: ImageView = itemView.findViewById<ImageView>(R.id.idIVDelete)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -37,13 +38,13 @@ class NoteRVAdapter(val context: Context, val noteClickDeleteInterface: NoteClic
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         // on below line we are setting data to item of recycler view.
-        holder.noteTV.setText(allNotes.get(position).noteTitle)
-        holder.dateTV.setText("Last Updated : " + allNotes.get(position).dateTime)
+        holder.noteTV.text = allNotes[position].noteTitle
+        holder.dateTV.text = "Last Updated : " + allNotes[position].dateTime
         // on below line we are adding click listener to our delete image view icon.
         holder.deleteIV.setOnClickListener {
             // on below line we are calling a note click
             // interface and we are passing a position to it.
-            noteClickDeleteInterface.onDeleteIconClick(allNotes.get(position))
+            noteClickDeleteInterface.onDeleteIconClick(allNotes[position])
         }
 
         // on below line we are adding click listener
@@ -51,7 +52,7 @@ class NoteRVAdapter(val context: Context, val noteClickDeleteInterface: NoteClic
         holder.itemView.setOnClickListener {
             // on below line we are calling a note click interface
             // and we are passing a position to it.
-            noteClickInterface.onNoteClick(allNotes.get(position))
+            noteClickInterface.onNoteClick(allNotes[position])
         }
     }
 

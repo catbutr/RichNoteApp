@@ -4,15 +4,12 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.chinalwb.are.AREditor
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.example.noteapp.ViewModel.NoteViewModel
 import com.example.noteapp.Model.Note
-import java.util.*
+import com.example.noteapp.ViewModel.NoteViewModel
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 //TODO:Возможность выбора и создания категории
 //TODO:Имплементация текстового редактора
@@ -33,7 +30,7 @@ class MainActivity : AppCompatActivity(), NoteClickInterface, NoteClickDeleteInt
         //on below line we are setting layout manager to our recycler view.
         notesRV.layoutManager = LinearLayoutManager(this)
         //on below line we are initializing our adapter class.
-        val noteRVAdapter = NoteRVAdapter(this, this, this)
+        val noteRVAdapter = NoteRVAdapter(this, this)
         //on below line we are setting adapter to our recycler view.
         notesRV.adapter = noteRVAdapter
         //on below line we are initializing our view modal.
@@ -41,13 +38,13 @@ class MainActivity : AppCompatActivity(), NoteClickInterface, NoteClickDeleteInt
             this,
             ViewModelProvider.AndroidViewModelFactory.getInstance(application)
         ).get(NoteViewModel::class.java)
-        //on below line we are calling all notes methof from our view modal class to observer the changes on list.
-        viewModal.allNotes.observe(this, Observer { list ->
+        //on below line we are calling all notes method from our view modal class to observer the changes on list.
+        viewModal.allNotes.observe(this) { list ->
             list?.let {
                 //on below line we are updating our list.
                 noteRVAdapter.updateList(it)
             }
-        })
+        }
         addFAB.setOnClickListener {
             //adding a click listner for fab button and opening a new intent to add a new note.
             val intent = Intent(this@MainActivity, AddEditNoteActivity::class.java)

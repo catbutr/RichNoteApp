@@ -1,25 +1,43 @@
 package com.example.noteapp
 
+import android.annotation.SuppressLint
+import android.content.ContentValues.TAG
+import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
+import android.text.InputType
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
-import android.widget.TextView
+import android.widget.LinearLayout
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModelProvider
-import com.chinalwb.are.AREditor
+import androidx.lifecycle.lifecycleScope
 import com.example.noteapp.Model.Note
+import com.example.noteapp.Repository.TakePictureWithUriReturnContract
 import com.example.noteapp.ViewModel.NoteViewModel
 import jp.wasabeef.richeditor.RichEditor
-import jp.wasabeef.richeditor.RichEditor.OnTextChangeListener
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
 
+@Suppress("DEPRECATION")
 class AddEditNoteActivity : AppCompatActivity() {
+    private lateinit var imageUri: Uri
+    private lateinit var videoUri: Uri
+    private lateinit var audioUri: Uri
+    private lateinit var cameraImageUri: Uri
+
     // on below line we are creating
     // variables for our UI components.
     lateinit var noteTitleEdt: EditText
@@ -27,14 +45,86 @@ class AddEditNoteActivity : AppCompatActivity() {
     lateinit var saveBtn: Button
 
     // on below line we are creating variable for
-    // viewmodal and integer for our note id.
+    // view-model and integer for our note id.
     lateinit var viewModel: NoteViewModel
     var noteID = -1;
 
+    @SuppressLint("Recycle")
+    private fun getTmpFileUri(): Uri {
+        val tmpFile = File.createTempFile("tmp_image_file", ".png", this.filesDir).apply {
+            createNewFile()
+            deleteOnExit()
+        }
+        return FileProvider.getUriForFile(applicationContext,
+            "${BuildConfig.APPLICATION_ID}.provider", tmpFile)
+    }
+    private fun takeImage() {
+        lifecycleScope.launchWhenStarted {
+            getTmpFileUri().let { uri -> takeImageResult.launch(uri)}
+        }
+    }
+
+    private val takeImageResult = registerForActivityResult(TakePictureWithUriReturnContract()) { (isSuccess, imageUri) ->
+        if (isSuccess) {
+            noteEdt.insertImage(imageUri.toString(), "Test", 320)
+        }
+    }
+
+    private val getGalleryImageActivityResultLauncher =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            Log.d(TAG, "getImageActivityResultLauncher: uri = $uri")
+            if (uri != null) {
+                imageUri = uri
+                val outputFile = this.filesDir.resolve((0..100000).random().toString())
+                contentResolver.openInputStream(imageUri)?.copyTo(outputFile.outputStream())
+                imageUri = outputFile.toUri()
+                noteEdt.insertImage(imageUri.toString(), "Test", 320)
+            }
+        }
+
+    private val getCameraImageActivityResultLauncher =
+        registerForActivityResult(TakePictureWithUriReturnContract()) { (isSuccess, uri) ->
+            Log.d(TAG, "getImageActivityResultLauncher: uri = $uri")
+            if (isSuccess && uri != null) {
+                imageUri = uri
+                val outputFile = this.filesDir.resolve((0..100000).random().toString())
+                contentResolver.openInputStream(imageUri)?.copyTo(outputFile.outputStream())
+                cameraImageUri = outputFile.toUri()
+                noteEdt.insertImage(cameraImageUri.toString(), "Test", 320)
+            }
+        }
+
+
+
+    private val getGalleryVideoActivityResultLauncher =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            Log.d(TAG, "getVideoActivityResultLauncher: uri = $uri")
+            if (uri != null) {
+                videoUri = uri
+                val outputFile = this.filesDir.resolve((0..100000).random().toString())
+                contentResolver.openInputStream(videoUri)?.copyTo(outputFile.outputStream())
+                videoUri = outputFile.toUri()
+                noteEdt.insertVideo(videoUri.toString(), 320, 320)
+            }
+        }
+
+    private val getGalleryAudioActivityResultLauncher =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            Log.d(TAG, "getVideoActivityResultLauncher: uri = $uri")
+            if (uri != null) {
+                audioUri = uri
+                val outputFile = this.filesDir.resolve((0..100000).random().toString())
+                contentResolver.openInputStream(audioUri)?.copyTo(outputFile.outputStream())
+                audioUri = outputFile.toUri()
+                noteEdt.insertAudio(audioUri.toString())
+            }
+        }
+
+    @SuppressLint("IntentReset")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.testing_layout)
-
+        //Initialising cache
         // on below line we are initializing our view modal.
         viewModel = ViewModelProvider(
             this,
@@ -127,32 +217,121 @@ class AddEditNoteActivity : AppCompatActivity() {
         findViewById<View>(R.id.action_insert_numbers).setOnClickListener{ noteEdt.setNumbers() }
 
         findViewById<View>(R.id.action_insert_image).setOnClickListener {
-            noteEdt.insertImage(
-                "https://raw.githubusercontent.com/wasabeef/art/master/chip.jpg",
-                "dachshund", 320
-            )
+            val choice = arrayOf<CharSequence>("Take Photo", "Choose from Gallery", "Cancel")
+            val myAlertDialog: AlertDialog.Builder = AlertDialog.Builder(this)
+            myAlertDialog.setTitle("Select Image")
+            myAlertDialog.setItems(choice, DialogInterface.OnClickListener { dialog, item ->
+                when {
+                    choice[item] == "Choose from Gallery" -> {
+                        getGalleryImageActivityResultLauncher.launch("image/*")
+                    }
+                    // Select "Take Photo" to take a photo
+                    choice[item] == "Take Photo" -> {
+                        getCameraImageActivityResultLauncher.launch(cameraImageUri)
+                    }
+                    // Select "Cancel" to cancel the task
+                    choice[item] == "Cancel" -> {
+                    }
+                }
+            })
+            myAlertDialog.show()
         }
 
-        findViewById<View>(R.id.action_insert_youtube).setOnClickListener {
-            noteEdt.insertYoutubeVideo(
-            "https://www.youtube.com/embed/pS5peqApgUA") }
+        findViewById<View>(R.id.action_insert_youtube).setOnClickListener{
+            val myAlertDialog: AlertDialog.Builder = AlertDialog.Builder(this)
+            val inputField = EditText(this)
+            var m_Text:String
+            myAlertDialog.setTitle("Insert Link")
+            inputField.setHint("Enter Text")
+            inputField.inputType = InputType.TYPE_CLASS_TEXT
+            myAlertDialog.setView(inputField)
+            // Set up the buttons
+            myAlertDialog.setPositiveButton("OK",
+                DialogInterface.OnClickListener { dialog, which ->
+                // Here you get get input text from the Edittext
+                    m_Text = inputField.text.toString();
+                    m_Text =m_Text.replace("youtu.be/","www.youtube.com/embed/")
+                    noteEdt.insertYoutubeVideo(m_Text)
+            })
+            myAlertDialog.setNegativeButton("Cancel",
+                DialogInterface.OnClickListener { dialog, which -> dialog.cancel() })
+
+            myAlertDialog.show()
+        }
 
         findViewById<View>(R.id.action_insert_audio).setOnClickListener{
-            noteEdt.insertAudio(
-                "https://file-examples-com.github.io/uploads/2017/11/file_example_MP3_5MG.mp3") }
+            val choice = arrayOf<CharSequence>("Take Video", "Choose from Gallery", "Cancel")
+            val myAlertDialog: AlertDialog.Builder = AlertDialog.Builder(this)
+            myAlertDialog.setTitle("Select Video")
+            myAlertDialog.setItems(choice, DialogInterface.OnClickListener { dialog, item ->
+                when {
+                    choice[item] == "Choose from Gallery" -> {
+                        getGalleryAudioActivityResultLauncher.launch("audio/*")
+                    }
+                    // Select "Take Photo" to take a photo
+                    choice[item] == "Take Video" -> {
+                        val cameraPicture = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                        startActivityForResult(cameraPicture, 0)
+                    }
+                    // Select "Cancel" to cancel the task
+                    choice[item] == "Cancel" -> {
+                    }
+                }
+            })
+            myAlertDialog.show()
+        }
 
         findViewById<View>(R.id.action_insert_video).setOnClickListener {
-            noteEdt.insertVideo(
-                "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/1080/Big_Buck_Bunny_1080_10s_10MB.mp4",
-                360
-            )
+            val choice = arrayOf<CharSequence>("Take Video", "Choose from Gallery", "Cancel")
+            val myAlertDialog: AlertDialog.Builder = AlertDialog.Builder(this)
+            myAlertDialog.setTitle("Select Video")
+            myAlertDialog.setItems(choice) { dialog, item ->
+                when {
+                    choice[item] == "Choose from Gallery" -> {
+                        getGalleryVideoActivityResultLauncher.launch("video/*")
+                    }
+                    // Select "Take Photo" to take a photo
+                    choice[item] == "Take Video" -> {
+                        val cameraPicture = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                        startActivityForResult(cameraPicture, 0)
+                    }
+                    // Select "Cancel" to cancel the task
+                    choice[item] == "Cancel" -> {
+                    }
+                }
+            }
+            myAlertDialog.show()
         }
 
         findViewById<View>(R.id.action_insert_link).setOnClickListener {
-            noteEdt.insertLink(
-                "https://github.com/wasabeef",
-                "wasabeef"
-            )
+            val myAlertDialog: AlertDialog.Builder = AlertDialog.Builder(this)
+            val inputLinkField = EditText(this)
+            val inputTextFiled = EditText(this)
+            val layout = LinearLayout(this)
+            var hyperlinkText:String
+            var titleText:String
+            myAlertDialog.setTitle("Insert Link")
+            inputLinkField.setHint("Enter Link")
+            inputLinkField.inputType = InputType.TYPE_CLASS_TEXT
+            inputTextFiled.setHint("Enter Text")
+            inputTextFiled.inputType = InputType.TYPE_CLASS_TEXT
+            layout.orientation = LinearLayout.VERTICAL
+            layout.addView(inputTextFiled)
+            layout.addView(inputLinkField)
+
+            myAlertDialog.setView(layout)
+            // Set up the buttons
+            myAlertDialog.setPositiveButton("OK",
+                DialogInterface.OnClickListener { dialog, which ->
+                    // Here you get get input text from the Edittext
+                    hyperlinkText = inputLinkField.text.toString();
+                    titleText = inputTextFiled.text.toString()
+                    noteEdt.insertLink(hyperlinkText,titleText)
+                })
+            myAlertDialog.setNegativeButton("Cancel",
+                DialogInterface.OnClickListener { dialog, which -> dialog.cancel() })
+
+            myAlertDialog.show()
         }
         findViewById<View>(R.id.action_insert_checkbox).setOnClickListener { noteEdt.insertTodo() }
 
@@ -199,5 +378,11 @@ class AddEditNoteActivity : AppCompatActivity() {
             startActivity(Intent(applicationContext, MainActivity::class.java))
             this.finish()
         }
+    }
+
+    override fun onBackPressed() {
+        val intent = Intent(this@AddEditNoteActivity, MainActivity::class.java)
+        startActivity(intent)
+        this.finish()
     }
 }
