@@ -4,7 +4,8 @@ import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import kotlinx.android.parcel.Parcelize as Parcelize
+import kotlinx.parcelize.IgnoredOnParcel
+import kotlinx.parcelize.Parcelize as Parcelize
 
 @Parcelize
 @Entity(tableName = "Notes")
@@ -16,5 +17,6 @@ data class Note(
     @ColumnInfo(name = "date_time")
     val dateTime: String
 ): Parcelable{
+    @IgnoredOnParcel
     @PrimaryKey(autoGenerate = true) var id = 0
 }
