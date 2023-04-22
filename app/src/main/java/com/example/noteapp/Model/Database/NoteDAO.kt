@@ -6,7 +6,7 @@ import com.example.noteapp.Model.Note
 @Dao
 interface NoteDAO {
 
-    @Query("SELECT * FROM notes ORDER BY id DESC")
+    @Query("SELECT * FROM notes ORDER BY date_time DESC")
     fun getAllNotes(): LiveData<List<Note>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

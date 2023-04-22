@@ -40,14 +40,14 @@ class AddEditNoteActivity : AppCompatActivity() {
 
     // on below line we are creating
     // variables for our UI components.
-    lateinit var noteTitleEdt: EditText
+    private lateinit var noteTitleEdt: EditText
     lateinit var noteEdt: RichEditor
-    lateinit var saveBtn: Button
+    private lateinit var saveBtn: Button
 
     // on below line we are creating variable for
     // view-model and integer for our note id.
-    lateinit var viewModel: NoteViewModel
-    var noteID = -1;
+    private lateinit var viewModel: NoteViewModel
+    private var noteID = -1
 
     @SuppressLint("Recycle")
     private fun getTmpFileUri(): Uri {
@@ -150,7 +150,7 @@ class AddEditNoteActivity : AppCompatActivity() {
         //mEditor.setBackground("https://raw.githubusercontent.com/wasabeef/art/master/chip.jpg");
         //mEditor.setBackground("https://raw.githubusercontent.com/wasabeef/art/master/chip.jpg");
         noteEdt.setPlaceholder("Insert text here...")
-        noteEdt.settings.allowFileAccess = true;
+        noteEdt.settings.allowFileAccess = true
         //mEditor.setInputEnabled(false);
 
         //mEditor.setInputEnabled(false);
@@ -246,15 +246,15 @@ class AddEditNoteActivity : AppCompatActivity() {
             inputField.inputType = InputType.TYPE_CLASS_TEXT
             myAlertDialog.setView(inputField)
             // Set up the buttons
-            myAlertDialog.setPositiveButton("OK",
-                DialogInterface.OnClickListener { dialog, which ->
+            myAlertDialog.setPositiveButton("OK"
+            ) { dialog, which ->
                 // Here you get get input text from the Edittext
-                    m_Text = inputField.text.toString();
-                    m_Text =m_Text.replace("youtu.be/","www.youtube.com/embed/")
-                    noteEdt.insertYoutubeVideo(m_Text)
-            })
-            myAlertDialog.setNegativeButton("Cancel",
-                DialogInterface.OnClickListener { dialog, which -> dialog.cancel() })
+                m_Text = inputField.text.toString();
+                m_Text = m_Text.replace("youtu.be/", "www.youtube.com/embed/")
+                noteEdt.insertYoutubeVideo(m_Text)
+            }
+            myAlertDialog.setNegativeButton("Cancel"
+            ) { dialog, which -> dialog.cancel() }
 
             myAlertDialog.show()
         }
