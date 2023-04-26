@@ -25,6 +25,9 @@ import androidx.lifecycle.lifecycleScope
 import com.example.noteapp.Model.Note
 import com.example.noteapp.Repository.TakePictureWithUriReturnContract
 import com.example.noteapp.ViewModel.NoteViewModel
+import com.jaredrummler.android.colorpicker.ColorPickerDialog
+import com.jaredrummler.android.colorpicker.ColorPickerDialogListener
+import com.jaredrummler.android.colorpicker.ColorShape
 import jp.wasabeef.richeditor.RichEditor
 import java.io.File
 import java.text.SimpleDateFormat
@@ -32,17 +35,23 @@ import java.util.*
 
 
 @Suppress("DEPRECATION")
-class AddEditNoteActivity : AppCompatActivity() {
+class AddEditNoteActivity : AppCompatActivity(), ColorPickerDialogListener {
     private lateinit var imageUri: Uri
     private lateinit var videoUri: Uri
     private lateinit var audioUri: Uri
     private lateinit var cameraImageUri: Uri
-
+    private val textColor = 1
+    private val backgroundColor = 2
+    private val noteColor = 3
     // on below line we are creating
     // variables for our UI components.
     private lateinit var noteTitleEdt: EditText
     lateinit var noteEdt: RichEditor
     private lateinit var saveBtn: Button
+    private lateinit var colorBtn:Button
+    //Work with background color
+    private var selectedColor = Color.GRAY
+    private var isColorSelected = false
 
     // on below line we are creating variable for
     // view-model and integer for our note id.
@@ -68,6 +77,17 @@ class AddEditNoteActivity : AppCompatActivity() {
         if (isSuccess) {
             noteEdt.insertImage(imageUri.toString(), "Test", 320)
         }
+    }
+
+    private fun createColorPickerDialog(id: Int) {
+        ColorPickerDialog.newBuilder()
+            .setColor(Color.RED)
+            .setDialogType(ColorPickerDialog.TYPE_PRESETS)
+            .setAllowCustom(true)
+            .setAllowPresets(true)
+            .setColorShape(ColorShape.SQUARE)
+            .setDialogId(id)
+            .show(this)
     }
 
     private val getGalleryImageActivityResultLauncher =
@@ -135,7 +155,7 @@ class AddEditNoteActivity : AppCompatActivity() {
         noteTitleEdt = findViewById(R.id.idEdtNoteName)
         noteEdt = findViewById(R.id.idEdtNoteDesc)
         saveBtn = findViewById(R.id.idBtn)
-
+        colorBtn = findViewById(R.id.idBtnColor)
         //on below we are initialising rich editor
         noteEdt.setEditorHeight(200)
         noteEdt.setEditorFontSize(22)
@@ -185,17 +205,21 @@ class AddEditNoteActivity : AppCompatActivity() {
 
         findViewById<View>(R.id.action_txt_color).setOnClickListener(object : View.OnClickListener
         {
-            private var isChanged = false
             override fun onClick(v: View?) {
-                noteEdt.setTextColor(if (isChanged) Color.BLACK else Color.RED)
-                isChanged = !isChanged
+                createColorPickerDialog(textColor);
             }
         })
 
         findViewById<View>(R.id.action_bg_color).setOnClickListener(object : View.OnClickListener {
             private var isChanged = false
             override fun onClick(v: View?) {
-                noteEdt.setTextBackgroundColor(if (isChanged) Color.TRANSPARENT else Color.YELLOW)
+                if (isChanged){
+                    noteEdt.setTextBackgroundColor(Color.TRANSPARENT)
+                }
+                else
+                {
+                    createColorPickerDialog(backgroundColor);
+                }
                 isChanged = !isChanged
             }
         })
@@ -311,9 +335,9 @@ class AddEditNoteActivity : AppCompatActivity() {
             var hyperlinkText:String
             var titleText:String
             myAlertDialog.setTitle("Insert Link")
-            inputLinkField.setHint("Enter Link")
+            inputLinkField.hint = "Enter Link"
             inputLinkField.inputType = InputType.TYPE_CLASS_TEXT
-            inputTextFiled.setHint("Enter Text")
+            inputTextFiled.hint = "Enter Text"
             inputTextFiled.inputType = InputType.TYPE_CLASS_TEXT
             layout.orientation = LinearLayout.VERTICAL
             layout.addView(inputTextFiled)
@@ -360,7 +384,8 @@ class AddEditNoteActivity : AppCompatActivity() {
                 if (noteTitle.isNotEmpty() && noteDescription.isNotEmpty()) {
                     val sdf = SimpleDateFormat("dd MMM, yyyy - HH:mm")
                     val currentDateAndTime: String = sdf.format(Date())
-                    val updatedNote = Note(noteTitle, noteDescription, currentDateAndTime)
+                    val updatedNote = Note(noteTitle, noteDescription, currentDateAndTime,
+                        selectedColor)
                     updatedNote.id = noteID
                     viewModel.updateNote(updatedNote)
                     Toast.makeText(this, "Note Updated..", Toast.LENGTH_LONG).show()
@@ -370,7 +395,7 @@ class AddEditNoteActivity : AppCompatActivity() {
                     val sdf = SimpleDateFormat("dd MMM, yyyy - HH:mm")
                     val currentDateAndTime: String = sdf.format(Date())
                     //if the string is not empty we are calling a add note method to add data to our room database.
-                    viewModel.addNote(Note(noteTitle, noteDescription, currentDateAndTime))
+                    viewModel.addNote(Note(noteTitle, noteDescription, currentDateAndTime,selectedColor))
                     Toast.makeText(this, "$noteTitle Added", Toast.LENGTH_LONG).show()
                 }
             }
@@ -378,11 +403,33 @@ class AddEditNoteActivity : AppCompatActivity() {
             startActivity(Intent(applicationContext, MainActivity::class.java))
             this.finish()
         }
+
+        colorBtn.setOnClickListener{
+            createColorPickerDialog(noteColor);
+        }
+
+
+
     }
 
     override fun onBackPressed() {
         val intent = Intent(this@AddEditNoteActivity, MainActivity::class.java)
         startActivity(intent)
         this.finish()
+    }
+
+    override fun onColorSelected(dialogId: Int, color: Int) {
+        when (dialogId) {
+              textColor -> noteEdt.setTextColor(color)
+              backgroundColor -> noteEdt.setTextBackgroundColor(color)
+              noteColor ->
+              {
+                  selectedColor = color
+              }
+        }
+    }
+
+    override fun onDialogDismissed(dialogId: Int) {
+        Toast.makeText(this, "Dialog dismissed", Toast.LENGTH_SHORT).show();
     }
 }

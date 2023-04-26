@@ -18,6 +18,16 @@
         android:textColor="@color/white"
         android:textColorHint="@color/white" />
 
+    <!--button for picking a color for note-->
+    <Button
+        android:id="@+id/idBtnColor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/custom_button_back"
+        android:text="ColorPicker"
+        android:textAllCaps="false"
+        android:textColor="@color/white" />
+
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -1,5 +1,6 @@
 package com.example.noteapp
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -7,13 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.FileProvider
-import androidx.core.net.toUri
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import com.example.noteapp.Model.Note
 
 class NoteRVAdapter(
@@ -22,6 +17,14 @@ class NoteRVAdapter(
 ):
     RecyclerView.Adapter<NoteRVAdapter.ViewHolder>()
 {
+
+    companion object NoteRVCompat:AppCompatActivity() {
+        fun CreateCardView(): CardView? {
+            val cardView = findViewById<CardView>(R.id.CardView)
+            cardView.setCardBackgroundColor(Color.RED)
+            return cardView
+        }
+    }
     // on below line we are creating a
     // variable for our all notes list.
     private val allNotes = ArrayList<Note>()
@@ -54,7 +57,7 @@ class NoteRVAdapter(
             // interface and we are passing a position to it.
             noteClickDeleteInterface.onDeleteIconClick(allNotes[position])
         }
-
+        holder.itemView.setBackgroundColor(allNotes[position].backgroundColor)
         // on below line we are adding click listener
         // to our recycler view item.
         holder.itemView.setOnClickListener {
