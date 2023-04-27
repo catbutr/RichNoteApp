@@ -9,6 +9,9 @@ interface NoteDAO {
     @Query("SELECT * FROM notes ORDER BY date_time DESC")
     fun getAllNotes(): LiveData<List<Note>>
 
+    @Query("SELECT * FROM notes WHERE notebook = :notebookName")
+    fun getAllNotesFromNotebook(notebookName:String):LiveData<List<Note>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(note: Note)
 

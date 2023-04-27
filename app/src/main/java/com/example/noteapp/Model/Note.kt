@@ -21,7 +21,9 @@ data class Note(
     @ColumnInfo(name = "date_time")
     val dateTime: String,
     @ColumnInfo(name = "color")
-    var backgroundColor: Int = Color.GRAY
+    var backgroundColor: Int = Color.GRAY,
+    @ColumnInfo(name = "notebook")
+    var noteBook: String = "My Notes"
 ): Parcelable{
     @IgnoredOnParcel
     @PrimaryKey(autoGenerate = true) var id = 0

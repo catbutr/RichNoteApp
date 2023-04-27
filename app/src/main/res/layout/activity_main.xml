@@ -35,13 +35,10 @@
         app:backgroundTint="@color/black_shade_2"
         app:tint="@color/white" />
     </RelativeLayout>
-
-
     <com.google.android.material.navigation.NavigationView
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
+        android:id="@+id/nav_view2"
         app:menu="@menu/activity_main_drawer" />
-
-
 </androidx.drawerlayout.widget.DrawerLayout>

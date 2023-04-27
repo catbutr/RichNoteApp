@@ -7,6 +7,9 @@ import com.example.noteapp.Model.Database.NoteDAO
 class NoteRepository(private val noteDAO: NoteDAO) {
 
     val allNotes: LiveData<List<Note>> = noteDAO.getAllNotes()
+    fun allNotesFromNotebook(notebookName:String): LiveData<List<Note>> {
+        return noteDAO.getAllNotesFromNotebook(notebookName)
+    }
 
     suspend fun insert(note: Note) {
         noteDAO.insert(note)
