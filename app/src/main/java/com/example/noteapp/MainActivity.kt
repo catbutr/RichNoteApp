@@ -2,28 +2,48 @@ package com.example.noteapp
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.noteapp.Model.Note
 import com.example.noteapp.ViewModel.NoteViewModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.navigation.NavigationView
+
 
 //TODO:Возможность выбора и создания категории
 //TODO:Имплементация текстового редактора
 //TODO:Кастомизация приложения
-class MainActivity : AppCompatActivity(), NoteClickInterface, NoteClickDeleteInterface {
+class MainActivity : AppCompatActivity(), NoteClickInterface, NoteClickDeleteInterface,
+    NavigationView.OnNavigationItemSelectedListener {
 
     //on below line we are creating a variable for our recycler view, exit text, button and viewmodal.
     lateinit var viewModal: NoteViewModel
     lateinit var notesRV: RecyclerView
     lateinit var addFAB: FloatingActionButton
-
+    lateinit var drawerLayout:DrawerLayout
+    lateinit var actionBarDrawerToggle: ActionBarDrawerToggle
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        // drawer layout instance to toggle the menu icon to open
+        // drawer and back button to close drawer
+        drawerLayout = findViewById<DrawerLayout>(R.id.nav_view)
+        actionBarDrawerToggle = ActionBarDrawerToggle(this, drawerLayout, R.string.open_nav, R.string.close_nav)
+        // pass the Open and Close toggle for the drawer layout listener
+        // to toggle the button
+        drawerLayout.addDrawerListener(actionBarDrawerToggle)
+        actionBarDrawerToggle.syncState()
+        // to make the Navigation drawer icon always appear on the action bar
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
         //on below line we are initializing all our variables.
         notesRV = findViewById(R.id.notesRV)
         addFAB = findViewById(R.id.idFAB)
@@ -69,5 +89,11 @@ class MainActivity : AppCompatActivity(), NoteClickInterface, NoteClickDeleteInt
         viewModal.deleteNote(note)
         //displaying a toast message
         Toast.makeText(this, "${note.noteTitle} Deleted", Toast.LENGTH_LONG).show()
+    }
+
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        return if (actionBarDrawerToggle.onOptionsItemSelected(item)) {
+            true
+        } else super.onOptionsItemSelected(item)
     }
 }
