@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- action button for color picker -->
+    <item android:title="colorPicker"
+        android:id="@+id/colorPicker"
+        android:orderInCategory="100"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/picker_icon"/>
+
+    <!-- action button for save -->
+    <item android:title="save"
+        android:id="@+id/save"
+        android:orderInCategory="100"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/save_icon"/>
+
+</menu>

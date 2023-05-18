@@ -4,11 +4,11 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
+import com.example.noteapp.Model.Database.NoteDatabase
+import com.example.noteapp.Model.Note
+import com.example.noteapp.Repository.NoteRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import com.example.noteapp.Model.Note
-import com.example.noteapp.Model.Database.NoteDatabase
-import com.example.noteapp.Repository.NoteRepository
 
 class NoteViewModel(application: Application) : AndroidViewModel(application) {
     // on below line we are creating a variable
@@ -45,5 +45,9 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
 
     fun getAllNotesFromNotebook(notebookName: String): LiveData<List<Note>> {
         return repository.allNotesFromNotebook(notebookName)
+    }
+
+    fun searchDatabaseByTitle(notebookName: String,searchQuery: String):LiveData<List<Note>>{
+        return repository.searchDatabaseByTitle(notebookName,searchQuery)
     }
 }

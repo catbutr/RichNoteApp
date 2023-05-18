@@ -7,9 +7,10 @@ import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
 import android.text.InputType
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -18,28 +19,22 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import com.example.noteapp.Model.Note
-import com.example.noteapp.Repository.TakePictureWithUriReturnContract
 import com.example.noteapp.ViewModel.NoteViewModel
 import com.jaredrummler.android.colorpicker.ColorPickerDialog
 import com.jaredrummler.android.colorpicker.ColorPickerDialogListener
 import com.jaredrummler.android.colorpicker.ColorShape
 import jp.wasabeef.richeditor.RichEditor
-import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
-
 
 @Suppress("DEPRECATION")
 class AddEditNoteActivity : AppCompatActivity(), ColorPickerDialogListener {
     private lateinit var imageUri: Uri
     private lateinit var videoUri: Uri
     private lateinit var audioUri: Uri
-    private lateinit var cameraImageUri: Uri
     private val textColor = 1
     private val backgroundColor = 2
     private val noteColor = 3
@@ -51,33 +46,10 @@ class AddEditNoteActivity : AppCompatActivity(), ColorPickerDialogListener {
     private lateinit var colorBtn:Button
     //Work with background color
     private var selectedColor = Color.GRAY
-    private var isColorSelected = false
-
     // on below line we are creating variable for
     // view-model and integer for our note id.
     private lateinit var viewModel: NoteViewModel
     private var noteID = -1
-
-    @SuppressLint("Recycle")
-    private fun getTmpFileUri(): Uri {
-        val tmpFile = File.createTempFile("tmp_image_file", ".png", this.filesDir).apply {
-            createNewFile()
-            deleteOnExit()
-        }
-        return FileProvider.getUriForFile(applicationContext,
-            "${BuildConfig.APPLICATION_ID}.provider", tmpFile)
-    }
-    private fun takeImage() {
-        lifecycleScope.launchWhenStarted {
-            getTmpFileUri().let { uri -> takeImageResult.launch(uri)}
-        }
-    }
-
-    private val takeImageResult = registerForActivityResult(TakePictureWithUriReturnContract()) { (isSuccess, imageUri) ->
-        if (isSuccess) {
-            noteEdt.insertImage(imageUri.toString(), "Test", 320)
-        }
-    }
 
     private fun createColorPickerDialog(id: Int) {
         ColorPickerDialog.newBuilder()
@@ -101,20 +73,6 @@ class AddEditNoteActivity : AppCompatActivity(), ColorPickerDialogListener {
                 noteEdt.insertImage(imageUri.toString(), "Test", 320)
             }
         }
-
-    private val getCameraImageActivityResultLauncher =
-        registerForActivityResult(TakePictureWithUriReturnContract()) { (isSuccess, uri) ->
-            Log.d(TAG, "getImageActivityResultLauncher: uri = $uri")
-            if (isSuccess && uri != null) {
-                imageUri = uri
-                val outputFile = this.filesDir.resolve((0..100000).random().toString())
-                contentResolver.openInputStream(imageUri)?.copyTo(outputFile.outputStream())
-                cameraImageUri = outputFile.toUri()
-                noteEdt.insertImage(cameraImageUri.toString(), "Test", 320)
-            }
-        }
-
-
 
     private val getGalleryVideoActivityResultLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -154,26 +112,13 @@ class AddEditNoteActivity : AppCompatActivity(), ColorPickerDialogListener {
         // on below line we are initializing all our variables.
         noteTitleEdt = findViewById(R.id.idEdtNoteName)
         noteEdt = findViewById(R.id.idEdtNoteDesc)
-        saveBtn = findViewById(R.id.idBtn)
-        colorBtn = findViewById(R.id.idBtnColor)
         //on below we are initialising rich editor
         noteEdt.setEditorHeight(200)
         noteEdt.setEditorFontSize(22)
         noteEdt.setEditorFontColor(Color.RED)
-        //mEditor.setEditorBackgroundColor(Color.BLUE);
-        //mEditor.setBackgroundColor(Color.BLUE);
-        //mEditor.setBackgroundResource(R.drawable.bg);
-        //mEditor.setEditorBackgroundColor(Color.BLUE);
-        //mEditor.setBackgroundColor(Color.BLUE);
-        //mEditor.setBackgroundResource(R.drawable.bg);
         noteEdt.setPadding(10, 10, 10, 10)
-        //mEditor.setBackground("https://raw.githubusercontent.com/wasabeef/art/master/chip.jpg");
-        //mEditor.setBackground("https://raw.githubusercontent.com/wasabeef/art/master/chip.jpg");
         noteEdt.setPlaceholder("Insert text here...")
         noteEdt.settings.allowFileAccess = true
-        //mEditor.setInputEnabled(false);
-
-        //mEditor.setInputEnabled(false);
 
         findViewById<View>(R.id.action_undo).setOnClickListener { noteEdt.undo() }
 
@@ -249,10 +194,6 @@ class AddEditNoteActivity : AppCompatActivity(), ColorPickerDialogListener {
                     choice[item] == "Choose from Gallery" -> {
                         getGalleryImageActivityResultLauncher.launch("image/*")
                     }
-                    // Select "Take Photo" to take a photo
-                    choice[item] == "Take Photo" -> {
-                        getCameraImageActivityResultLauncher.launch(cameraImageUri)
-                    }
                     // Select "Cancel" to cancel the task
                     choice[item] == "Cancel" -> {
                     }
@@ -292,11 +233,6 @@ class AddEditNoteActivity : AppCompatActivity(), ColorPickerDialogListener {
                     choice[item] == "Choose from Gallery" -> {
                         getGalleryAudioActivityResultLauncher.launch("audio/*")
                     }
-                    // Select "Take Photo" to take a photo
-                    choice[item] == "Take Video" -> {
-                        val cameraPicture = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                        startActivityForResult(cameraPicture, 0)
-                    }
                     // Select "Cancel" to cancel the task
                     choice[item] == "Cancel" -> {
                     }
@@ -313,11 +249,6 @@ class AddEditNoteActivity : AppCompatActivity(), ColorPickerDialogListener {
                 when {
                     choice[item] == "Choose from Gallery" -> {
                         getGalleryVideoActivityResultLauncher.launch("video/*")
-                    }
-                    // Select "Take Photo" to take a photo
-                    choice[item] == "Take Video" -> {
-                        val cameraPicture = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                        startActivityForResult(cameraPicture, 0)
                     }
                     // Select "Cancel" to cancel the task
                     choice[item] == "Cancel" -> {
@@ -366,54 +297,67 @@ class AddEditNoteActivity : AppCompatActivity(), ColorPickerDialogListener {
             // on below line we are setting data to edit text.
             val noteTitle = intent.getStringExtra("noteTitle")
             val noteDescription = intent.getStringExtra("noteDescription")
+            selectedColor = intent.getIntExtra("noteColor", Color.GRAY)
             noteID = intent.getIntExtra("noteId", -1)
-            saveBtn.text = "Update Note"
             noteTitleEdt.setText(/* text = */ noteTitle)
             noteEdt.html = noteDescription
-        } else {
-            saveBtn.text = "Save Note"
         }
+    }
 
-        //on below line we are adding click listner to our save button.
-        saveBtn.setOnClickListener {
-            //on below line we are getting title and desc from edit text.
-            val noteTitle = noteTitleEdt.text.toString()
-            val noteDescription = noteEdt.html
-            //on below line we are checking the type and then saving or updating the data.
-            if (noteType.equals("Edit")) {
-                if (noteTitle.isNotEmpty() && noteDescription.isNotEmpty()) {
-                    val sdf = SimpleDateFormat("dd MMM, yyyy - HH:mm")
-                    val currentDateAndTime: String = sdf.format(Date())
-                    val updatedNote = Note(noteTitle, noteDescription, currentDateAndTime,
-                        selectedColor)
-                    updatedNote.id = noteID
-                    viewModel.updateNote(updatedNote)
-                    Toast.makeText(this, "Note Updated..", Toast.LENGTH_LONG).show()
+    // method to inflate the options menu when
+    // the user opens the menu for the first time
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.add_edit_note_action_bar, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val noteType = intent.getStringExtra("noteType")
+        when (item.itemId) {
+            R.id.save -> {
+                //on below line we are getting title and desc from edit text.
+                val noteTitle = noteTitleEdt.text.toString()
+                val noteDescription = noteEdt.html
+                val selectedNoteBookButton = intent.getStringExtra("selectedNotebook")
+                //on below line we are checking the type and then saving or updating the data.
+                if (noteType.equals("Edit")) {
+                    if (noteTitle.isNotEmpty() && noteDescription.isNotEmpty()) {
+                        val sdf = SimpleDateFormat("dd MMM, yyyy - HH:mm")
+                        val currentDateAndTime: String = sdf.format(Date())
+                        val updatedNote = Note(noteTitle, noteDescription, currentDateAndTime,
+                            selectedColor,selectedNoteBookButton.toString())
+                        updatedNote.id = noteID
+                        viewModel.updateNote(updatedNote)
+//                        Toast.makeText(this, "Note Updated..", Toast.LENGTH_LONG).show()
+                    }
+                } else {
+                    if (noteTitle.isNotEmpty() && noteDescription.isNotEmpty()) {
+                        val sdf = SimpleDateFormat("dd MMM, yyyy - HH:mm")
+                        val currentDateAndTime: String = sdf.format(Date())
+                        //if the string is not empty we are calling a add note method to add data to our room database.
+                        viewModel.addNote(Note(noteTitle, noteDescription, currentDateAndTime,selectedColor,
+                            selectedNoteBookButton.toString()
+                        ))
+//                        Toast.makeText(this, "$noteTitle Added", Toast.LENGTH_LONG).show()
+                    }
                 }
-            } else {
-                if (noteTitle.isNotEmpty() && noteDescription.isNotEmpty()) {
-                    val sdf = SimpleDateFormat("dd MMM, yyyy - HH:mm")
-                    val currentDateAndTime: String = sdf.format(Date())
-                    //if the string is not empty we are calling a add note method to add data to our room database.
-                    viewModel.addNote(Note(noteTitle, noteDescription, currentDateAndTime,selectedColor))
-                    Toast.makeText(this, "$noteTitle Added", Toast.LENGTH_LONG).show()
-                }
+                Toast.makeText(this, "$selectedNoteBookButton is current notebook", Toast.LENGTH_LONG).show()
+                //opening the new activity on below line
+                val mainIntent = Intent(this@AddEditNoteActivity, MainActivity::class.java)
+                mainIntent.putExtra("previousNotebook",selectedNoteBookButton)
+                mainIntent.putExtra("viewFlag",true)
+                startActivity(mainIntent)
+                this.finish()
             }
-            //opening the new activity on below line
-            startActivity(Intent(applicationContext, MainActivity::class.java))
-            this.finish()
+            R.id.colorPicker -> createColorPickerDialog(noteColor);
         }
-
-        colorBtn.setOnClickListener{
-            createColorPickerDialog(noteColor);
-        }
-
-
-
+        return super.onOptionsItemSelected(item)
     }
 
     override fun onBackPressed() {
         val intent = Intent(this@AddEditNoteActivity, MainActivity::class.java)
+        val lastNotebook = intent.getStringExtra("selectedNotebook")
+        intent.putExtra("lastNotebook", lastNotebook.toString())
         startActivity(intent)
         this.finish()
     }

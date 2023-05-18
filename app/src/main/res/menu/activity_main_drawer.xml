@@ -3,21 +3,37 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
-    <group android:checkableBehavior="single">
+    <group
+        android:checkableBehavior="single"
+        android:id="@+id/nav_notebooks">
         <item
+            android:orderInCategory="0"
             android:id="@+id/nav_my_notes"
             android:title="My Notes" />
         <item
+            android:orderInCategory="0"
             android:id="@+id/nav_new_notes"
-            android:title="New Notes" />
+            android:title="My notes" />
     </group>
 
-    <item android:title="Setting">
-        <menu>
+    <group
+        android:checkableBehavior="single"
+        android:id="@+id/nav_divider">
+        <item
+            android:orderInCategory="1"
+            android:id="@+id/nav_new_notebook"
+            android:title="Create new notebook"
+            />
+    </group>
+
+    <group
+        android:checkableBehavior="single"
+        android:id="@+id/nav_settings_group"
+        android:title="Setting">
             <item
+                android:orderInCategory="2"
                 android:id="@+id/nav_settings"
                 android:title="Settings" />
-        </menu>
-    </item>
+    </group>
 
 </menu>

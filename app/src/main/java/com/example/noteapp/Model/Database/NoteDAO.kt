@@ -12,6 +12,9 @@ interface NoteDAO {
     @Query("SELECT * FROM notes WHERE notebook = :notebookName")
     fun getAllNotesFromNotebook(notebookName:String):LiveData<List<Note>>
 
+    @Query("SELECT * FROM notes WHERE notebook = :notebookName AND title LIKE :searchQuery")
+    fun searchDatabaseByTitle(notebookName:String, searchQuery: String):LiveData<List<Note>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(note: Note)
 
