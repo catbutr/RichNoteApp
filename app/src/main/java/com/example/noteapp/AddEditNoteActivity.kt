@@ -2,7 +2,6 @@ package com.example.noteapp
 
 import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
-import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
@@ -12,7 +11,6 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.Toast
@@ -27,7 +25,7 @@ import com.jaredrummler.android.colorpicker.ColorPickerDialog
 import com.jaredrummler.android.colorpicker.ColorPickerDialogListener
 import com.jaredrummler.android.colorpicker.ColorShape
 import jp.wasabeef.richeditor.RichEditor
-import java.text.SimpleDateFormat
+import java.text.DateFormat.getDateTimeInstance
 import java.util.*
 
 @Suppress("DEPRECATION")
@@ -42,8 +40,7 @@ class AddEditNoteActivity : AppCompatActivity(), ColorPickerDialogListener {
     // variables for our UI components.
     private lateinit var noteTitleEdt: EditText
     lateinit var noteEdt: RichEditor
-    private lateinit var saveBtn: Button
-    private lateinit var colorBtn:Button
+
     //Work with background color
     private var selectedColor = Color.GRAY
     // on below line we are creating variable for
@@ -101,7 +98,7 @@ class AddEditNoteActivity : AppCompatActivity(), ColorPickerDialogListener {
     @SuppressLint("IntentReset")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.testing_layout)
+        setContentView(R.layout.activity_add_edit_note)
         //Initialising cache
         // on below line we are initializing our view modal.
         viewModel = ViewModelProvider(
@@ -148,12 +145,11 @@ class AddEditNoteActivity : AppCompatActivity(), ColorPickerDialogListener {
 
         findViewById<View>(R.id.action_heading6).setOnClickListener{ noteEdt.setHeading(6) }
 
-        findViewById<View>(R.id.action_txt_color).setOnClickListener(object : View.OnClickListener
-        {
-            override fun onClick(v: View?) {
-                createColorPickerDialog(textColor);
-            }
-        })
+        findViewById<View>(R.id.action_txt_color).setOnClickListener {
+            createColorPickerDialog(
+                textColor
+            )
+        }
 
         findViewById<View>(R.id.action_bg_color).setOnClickListener(object : View.OnClickListener {
             private var isChanged = false
@@ -163,7 +159,7 @@ class AddEditNoteActivity : AppCompatActivity(), ColorPickerDialogListener {
                 }
                 else
                 {
-                    createColorPickerDialog(backgroundColor);
+                    createColorPickerDialog(backgroundColor)
                 }
                 isChanged = !isChanged
             }
@@ -189,7 +185,7 @@ class AddEditNoteActivity : AppCompatActivity(), ColorPickerDialogListener {
             val choice = arrayOf<CharSequence>("Take Photo", "Choose from Gallery", "Cancel")
             val myAlertDialog: AlertDialog.Builder = AlertDialog.Builder(this)
             myAlertDialog.setTitle("Select Image")
-            myAlertDialog.setItems(choice, DialogInterface.OnClickListener { dialog, item ->
+            myAlertDialog.setItems(choice) { _, item ->
                 when {
                     choice[item] == "Choose from Gallery" -> {
                         getGalleryImageActivityResultLauncher.launch("image/*")
@@ -198,28 +194,28 @@ class AddEditNoteActivity : AppCompatActivity(), ColorPickerDialogListener {
                     choice[item] == "Cancel" -> {
                     }
                 }
-            })
+            }
             myAlertDialog.show()
         }
 
         findViewById<View>(R.id.action_insert_youtube).setOnClickListener{
             val myAlertDialog: AlertDialog.Builder = AlertDialog.Builder(this)
             val inputField = EditText(this)
-            var m_Text:String
+            var inputLink:String
             myAlertDialog.setTitle("Insert Link")
-            inputField.setHint("Enter Text")
+            inputField.hint = "Enter Text"
             inputField.inputType = InputType.TYPE_CLASS_TEXT
             myAlertDialog.setView(inputField)
             // Set up the buttons
             myAlertDialog.setPositiveButton("OK"
-            ) { dialog, which ->
+            ) { _, _ ->
                 // Here you get get input text from the Edittext
-                m_Text = inputField.text.toString();
-                m_Text = m_Text.replace("youtu.be/", "www.youtube.com/embed/")
-                noteEdt.insertYoutubeVideo(m_Text)
+                inputLink = inputField.text.toString()
+                inputLink = inputLink.replace("youtu.be/", "www.youtube.com/embed/")
+                noteEdt.insertYoutubeVideo(inputLink)
             }
             myAlertDialog.setNegativeButton("Cancel"
-            ) { dialog, which -> dialog.cancel() }
+            ) { dialog, _ -> dialog.cancel() }
 
             myAlertDialog.show()
         }
@@ -228,7 +224,7 @@ class AddEditNoteActivity : AppCompatActivity(), ColorPickerDialogListener {
             val choice = arrayOf<CharSequence>("Take Video", "Choose from Gallery", "Cancel")
             val myAlertDialog: AlertDialog.Builder = AlertDialog.Builder(this)
             myAlertDialog.setTitle("Select Video")
-            myAlertDialog.setItems(choice, DialogInterface.OnClickListener { dialog, item ->
+            myAlertDialog.setItems(choice) { _, item ->
                 when {
                     choice[item] == "Choose from Gallery" -> {
                         getGalleryAudioActivityResultLauncher.launch("audio/*")
@@ -237,7 +233,7 @@ class AddEditNoteActivity : AppCompatActivity(), ColorPickerDialogListener {
                     choice[item] == "Cancel" -> {
                     }
                 }
-            })
+            }
             myAlertDialog.show()
         }
 
@@ -245,7 +241,7 @@ class AddEditNoteActivity : AppCompatActivity(), ColorPickerDialogListener {
             val choice = arrayOf<CharSequence>("Take Video", "Choose from Gallery", "Cancel")
             val myAlertDialog: AlertDialog.Builder = AlertDialog.Builder(this)
             myAlertDialog.setTitle("Select Video")
-            myAlertDialog.setItems(choice) { dialog, item ->
+            myAlertDialog.setItems(choice) { _, item ->
                 when {
                     choice[item] == "Choose from Gallery" -> {
                         getGalleryVideoActivityResultLauncher.launch("video/*")
@@ -276,15 +272,15 @@ class AddEditNoteActivity : AppCompatActivity(), ColorPickerDialogListener {
 
             myAlertDialog.setView(layout)
             // Set up the buttons
-            myAlertDialog.setPositiveButton("OK",
-                DialogInterface.OnClickListener { dialog, which ->
-                    // Here you get get input text from the Edittext
-                    hyperlinkText = inputLinkField.text.toString();
-                    titleText = inputTextFiled.text.toString()
-                    noteEdt.insertLink(hyperlinkText,titleText)
-                })
-            myAlertDialog.setNegativeButton("Cancel",
-                DialogInterface.OnClickListener { dialog, which -> dialog.cancel() })
+            myAlertDialog.setPositiveButton("OK"
+            ) { _, _ ->
+                // Here you get get input text from the Edittext
+                hyperlinkText = inputLinkField.text.toString()
+                titleText = inputTextFiled.text.toString()
+                noteEdt.insertLink(hyperlinkText, titleText)
+            }
+            myAlertDialog.setNegativeButton("Cancel"
+            ) { dialog, _ -> dialog.cancel() }
 
             myAlertDialog.show()
         }
@@ -322,7 +318,7 @@ class AddEditNoteActivity : AppCompatActivity(), ColorPickerDialogListener {
                 //on below line we are checking the type and then saving or updating the data.
                 if (noteType.equals("Edit")) {
                     if (noteTitle.isNotEmpty() && noteDescription.isNotEmpty()) {
-                        val sdf = SimpleDateFormat("dd MMM, yyyy - HH:mm")
+                        val sdf = getDateTimeInstance()
                         val currentDateAndTime: String = sdf.format(Date())
                         val updatedNote = Note(noteTitle, noteDescription, currentDateAndTime,
                             selectedColor,selectedNoteBookButton.toString())
@@ -332,7 +328,7 @@ class AddEditNoteActivity : AppCompatActivity(), ColorPickerDialogListener {
                     }
                 } else {
                     if (noteTitle.isNotEmpty() && noteDescription.isNotEmpty()) {
-                        val sdf = SimpleDateFormat("dd MMM, yyyy - HH:mm")
+                        val sdf = getDateTimeInstance()
                         val currentDateAndTime: String = sdf.format(Date())
                         //if the string is not empty we are calling a add note method to add data to our room database.
                         viewModel.addNote(Note(noteTitle, noteDescription, currentDateAndTime,selectedColor,
@@ -349,11 +345,12 @@ class AddEditNoteActivity : AppCompatActivity(), ColorPickerDialogListener {
                 startActivity(mainIntent)
                 this.finish()
             }
-            R.id.colorPicker -> createColorPickerDialog(noteColor);
+            R.id.colorPicker -> createColorPickerDialog(noteColor)
         }
         return super.onOptionsItemSelected(item)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         val intent = Intent(this@AddEditNoteActivity, MainActivity::class.java)
         val lastNotebook = intent.getStringExtra("selectedNotebook")
@@ -374,6 +371,6 @@ class AddEditNoteActivity : AppCompatActivity(), ColorPickerDialogListener {
     }
 
     override fun onDialogDismissed(dialogId: Int) {
-        Toast.makeText(this, "Dialog dismissed", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Dialog dismissed", Toast.LENGTH_SHORT).show()
     }
 }

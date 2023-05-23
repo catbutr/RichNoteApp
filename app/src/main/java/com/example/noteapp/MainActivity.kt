@@ -21,50 +21,45 @@ import com.example.noteapp.Model.Note
 import com.example.noteapp.ViewModel.NoteViewModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
-
-
-//TODO:Возвращение на активную категорию после выхода с экрана заметки
-//TODO:Динамическое добавление категорий
-//TODO:Поиск и сортировка
 class MainActivity : AppCompatActivity(), NoteClickInterface, SearchView.OnQueryTextListener,
     NoteClickDeleteInterface, NavigationView.OnNavigationItemSelectedListener {
 
     //ViewModel
-    lateinit var viewModel: NoteViewModel
+    private lateinit var viewModel: NoteViewModel
     //UI elements
-    lateinit var notesRV: RecyclerView
-    lateinit var addFAB: FloatingActionButton
-    lateinit var drawerLayout:DrawerLayout
-    lateinit var actionBarDrawerToggle: ActionBarDrawerToggle
+    private lateinit var notesRV: RecyclerView
+    private lateinit var addFAB: FloatingActionButton
+    private lateinit var drawerLayout:DrawerLayout
+    private lateinit var actionBarDrawerToggle: ActionBarDrawerToggle
     //Working variables
     private var selectedNotebook:String = "My Notes"
-    var addedDrawerMenuItems = mutableListOf<String>()
-    val noteRVAdapter = NoteRVAdapter(this, this)
+    private var addedDrawerMenuItems = mutableListOf<String>()
+    private val noteRVAdapter = NoteRVAdapter(this, this)
+    private var colorToggle = false
     private fun addNewNotebook(title:String)
     {
         val sharedPref = getPreferences(Context.MODE_PRIVATE)
-        var myEdit: SharedPreferences.Editor = sharedPref.edit()
-        var navigationView = findViewById<NavigationView>(R.id.nav_view2)
+        val myEdit: SharedPreferences.Editor = sharedPref.edit()
+        val navigationView = findViewById<NavigationView>(R.id.nav_view2)
         addedDrawerMenuItems.add(title)
         myEdit.putStringSet("notebooks",HashSet(addedDrawerMenuItems)).apply()
-        var existingMenu = navigationView.menu
+        val existingMenu = navigationView.menu
         existingMenu.add(R.id.nav_notebooks, Menu.NONE,0,title)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        var navigationView = findViewById<NavigationView>(R.id.nav_view2)
         outState.putString("selectedNotebook", selectedNotebook)
         outState.putStringArrayList("newItems",java.util.ArrayList(addedDrawerMenuItems))
         super.onSaveInstanceState(outState)
     }
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        var navigationView = findViewById<NavigationView>(R.id.nav_view2)
+        val navigationView = findViewById<NavigationView>(R.id.nav_view2)
         super.onRestoreInstanceState(savedInstanceState)
         selectedNotebook = savedInstanceState.getString("selectedNotebook").toString()
-        var newItems = savedInstanceState.getStringArrayList("newItems")
+        val newItems = savedInstanceState.getStringArrayList("newItems")
         if (newItems!!.isNotEmpty()) {
             for (i in newItems.indices) {
-                navigationView.menu.add(R.id.nav_notebooks, Menu.NONE, 0, newItems!![i])
+                navigationView.menu.add(R.id.nav_notebooks, Menu.NONE, 0, newItems[i])
             }
         }
         addedDrawerMenuItems=newItems
@@ -72,12 +67,13 @@ class MainActivity : AppCompatActivity(), NoteClickInterface, SearchView.OnQuery
     override fun onCreate(savedInstanceState: Bundle?) {
         //Data store
         val sharedPref = getPreferences(Context.MODE_PRIVATE)
-        var myEdit: SharedPreferences.Editor = sharedPref.edit()
+        val chosenTheme = sharedPref.getInt("chosenTheme", MODE_PRIVATE)
+        setTheme(chosenTheme)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         // drawer layout instance to toggle the menu icon to open
         // drawer and back button to close drawer
-        drawerLayout = findViewById<DrawerLayout>(R.id.nav_view)
+        drawerLayout = findViewById(R.id.nav_view)
         actionBarDrawerToggle = ActionBarDrawerToggle(this, drawerLayout, R.string.open_nav, R.string.close_nav)
         // pass the Open and Close toggle for the drawer layout listener
         // to toggle the button
@@ -106,7 +102,7 @@ class MainActivity : AppCompatActivity(), NoteClickInterface, SearchView.OnQuery
         viewModel = ViewModelProvider(
             this,
             ViewModelProvider.AndroidViewModelFactory.getInstance(application)
-        ).get(NoteViewModel::class.java)
+        )[NoteViewModel::class.java]
         Toast.makeText(this, intent.getStringExtra("lastNotebook")
             .toString() + " in main",Toast.LENGTH_SHORT).show()
         if (intent.getBooleanExtra("viewFlag",false)) {
@@ -121,7 +117,7 @@ class MainActivity : AppCompatActivity(), NoteClickInterface, SearchView.OnQuery
             }
         }
         addFAB.setOnClickListener {
-            //adding a click listner for fab button and opening a new intent to add a new note.
+            //adding a click listener for fab button and opening a new intent to add a new note.
             val intent = Intent(this@MainActivity, AddEditNoteActivity::class.java)
             intent.putExtra("selectedNotebook",selectedNotebook)
             startActivity(intent)
@@ -131,7 +127,7 @@ class MainActivity : AppCompatActivity(), NoteClickInterface, SearchView.OnQuery
 
     override fun onNoteClick(note: Note) {
         val sharedPref = getPreferences(Context.MODE_PRIVATE)
-        var myEdit: SharedPreferences.Editor = sharedPref.edit()
+        val myEdit: SharedPreferences.Editor = sharedPref.edit()
         myEdit.putStringSet("notebooks",HashSet(addedDrawerMenuItems)).apply()
         //opening a new intent and passing a data to it.
         val intent = Intent(this@MainActivity, AddEditNoteActivity::class.java)
@@ -155,10 +151,57 @@ class MainActivity : AppCompatActivity(), NoteClickInterface, SearchView.OnQuery
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         val noteRVAdapter = NoteRVAdapter(this, this)
         notesRV.adapter = noteRVAdapter
+        val sharedPref = getPreferences(Context.MODE_PRIVATE)
+        val myEdit: SharedPreferences.Editor = sharedPref.edit()
+        val choice = arrayOf<CharSequence>("Standard", "Red","Blue",
+            "Green","Yellow","Orange",
+        "Purple")
         when (item.itemId)
         {
-            R.id.nav_settings-> Toast.makeText(this,
-                "Settings not implemented yet",Toast.LENGTH_SHORT).show()
+            R.id.nav_settings-> {
+                val myAlertDialog: AlertDialog.Builder = AlertDialog.Builder(this)
+                myAlertDialog.setTitle("Select Video")
+                myAlertDialog.setItems(choice) { _, item ->
+                    when {
+                        choice[item] == "Standard" -> {
+                            myEdit.putInt("chosenTheme", R.style.Theme_NoteApp).apply()
+                            setTheme(R.style.Theme_NoteApp)
+                            recreate()
+                        }
+                        choice[item] == "Red" -> {
+                            myEdit.putInt("chosenTheme", R.style.Theme_NoteApp_Red).apply()
+                            setTheme(R.style.Theme_NoteApp)
+                            recreate()
+                        }
+                        choice[item] == "Blue" -> {
+                            myEdit.putInt("chosenTheme", R.style.Theme_NoteApp_Blue).apply()
+                            setTheme(R.style.Theme_NoteApp)
+                            recreate()
+                        }
+                        choice[item] == "Green" -> {
+                            myEdit.putInt("chosenTheme", R.style.Theme_NoteApp_Green).apply()
+                            setTheme(R.style.Theme_NoteApp)
+                            recreate()
+                        }
+                        choice[item] == "Yellow" -> {
+                            myEdit.putInt("chosenTheme", R.style.Theme_NoteApp_Yellow).apply()
+                            setTheme(R.style.Theme_NoteApp)
+                            recreate()
+                        }
+                        choice[item] == "Orange" -> {
+                            myEdit.putInt("chosenTheme", R.style.Theme_NoteApp_Orange).apply()
+                            setTheme(R.style.Theme_NoteApp)
+                            recreate()
+                        }
+                        choice[item] == "Purple" -> {
+                            myEdit.putInt("chosenTheme", R.style.Theme_NoteApp_Purple).apply()
+                            setTheme(R.style.Theme_NoteApp)
+                            recreate()
+                        }
+                    }
+                }
+                myAlertDialog.show()
+            }
             R.id.nav_new_notebook-> {
                 val currentLayout = LayoutInflater.from(this)
                 val newLayout = currentLayout.inflate(R.layout.edit_dialogue, null)
@@ -167,9 +210,9 @@ class MainActivity : AppCompatActivity(), NoteClickInterface, SearchView.OnQuery
                 val userInput = newLayout.findViewById<EditText>(R.id.input_text)
                 dialogBuilder.setCancelable(false)
                 dialogBuilder.setPositiveButton("OK")
-                { dialog, which -> addNewNotebook(userInput.text.toString()) }
+                { _, _ -> addNewNotebook(userInput.text.toString()) }
                 dialogBuilder.setNegativeButton("Cancel")
-                {dialog,which->dialog.cancel()}
+                { dialog, _ ->dialog.cancel()}
                 dialogBuilder.show()
             }
             else->{

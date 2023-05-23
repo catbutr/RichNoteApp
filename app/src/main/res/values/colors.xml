@@ -16,4 +16,33 @@
     <color name="dark_blue_shade">#0D2162</color>
     <color name="dark_blue_shade_2">#17388E</color>
     <color name="light_blue_shade">#12B2E6</color>
+
+    <color name = "PrimaryRed">#D32F2F</color>
+    <color name = "PrimaryVariantRed">#B71C1C</color>
+    <color name = "SecondaryRed">#EF5350</color>
+    <color name = "SecondaryVariantRed">#E53935</color>
+
+    <color name = "PrimaryBlue">#1976D2</color>
+    <color name = "PrimaryVariantBlue">#0288D1</color>
+    <color name = "SecondaryBlue">#00796B</color>
+    <color name = "SecondaryVariantBlue">#0097A7</color>
+
+    <color name="PrimaryGreen">#388E3C</color>
+    <color name="PrimaryVariantGreen">#2E7D32</color>
+    <color name="SecondaryGreen">#558B2F</color>
+    <color name="SecondaryVariantGreen">#689F38</color>
+
+    <color name="PrimaryYellow">#FBC02D</color>
+    <color name="PrimaryVariantYellow">#F9A825</color>
+    <color name="SecondaryYellow">#FFA000</color>
+    <color name="SecondaryVariantYellow">#FF8F00</color>
+    <color name="PrimaryOrange">#E64A19</color>
+    <color name="PrimaryVariantOrange">#BF360C</color>
+    <color name="SecondaryOrange">#F57C00</color>
+    <color name="SecondaryVariantOrange">#E65100</color>
+
+    <color name="PrimaryVariantPurple">#512DA8</color>
+    <color name="SecondaryVariantPurple">#7B1FA2</color>
+    <color name="PrimaryPurple">#7E57C2</color>
+    <color name="SecondaryPurple">#AB47BC</color>
 </resources>

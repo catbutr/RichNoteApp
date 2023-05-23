@@ -1,14 +1,11 @@
 package com.example.noteapp
 
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
-import androidx.appcompat.app.AppCompatActivity
 import com.example.noteapp.Model.Note
 
 class NoteRVAdapter(
@@ -17,14 +14,6 @@ class NoteRVAdapter(
 ):
     RecyclerView.Adapter<NoteRVAdapter.ViewHolder>()
 {
-
-    companion object NoteRVCompat:AppCompatActivity() {
-        fun CreateCardView(): CardView? {
-            val cardView = findViewById<CardView>(R.id.CardView)
-            cardView.setCardBackgroundColor(Color.RED)
-            return cardView
-        }
-    }
     // on below line we are creating a
     // variable for our all notes list.
     private val allNotes = ArrayList<Note>()
@@ -33,9 +22,9 @@ class NoteRVAdapter(
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         // on below line we are creating an initializing all our
         // variables which we have added in layout file.
-        val noteTV: TextView = itemView.findViewById<TextView>(R.id.idTVNote)
-        val dateTV: TextView = itemView.findViewById<TextView>(R.id.idTVDate)
-        val deleteIV: ImageView = itemView.findViewById<ImageView>(R.id.idIVDelete)
+        val noteTV: TextView = itemView.findViewById(R.id.idTVNote)
+        val dateTV: TextView = itemView.findViewById(R.id.idTVDate)
+        val deleteIV: ImageView = itemView.findViewById(R.id.idIVDelete)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

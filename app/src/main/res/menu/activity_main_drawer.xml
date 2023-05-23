@@ -9,11 +9,7 @@
         <item
             android:orderInCategory="0"
             android:id="@+id/nav_my_notes"
-            android:title="My Notes" />
-        <item
-            android:orderInCategory="0"
-            android:id="@+id/nav_new_notes"
-            android:title="My notes" />
+            android:title="@string/my_notes" />
     </group>
 
     <group
@@ -22,18 +18,18 @@
         <item
             android:orderInCategory="1"
             android:id="@+id/nav_new_notebook"
-            android:title="Create new notebook"
+            android:title="@string/main_create_new_notebook"
             />
     </group>
 
     <group
         android:checkableBehavior="single"
         android:id="@+id/nav_settings_group"
-        android:title="Setting">
+        android:title="@string/main_settings">
             <item
                 android:orderInCategory="2"
                 android:id="@+id/nav_settings"
-                android:title="Settings" />
+                android:title="@string/main_settings" />
     </group>
 
 </menu>

@@ -13,8 +13,8 @@ import kotlinx.coroutines.launch
 class NoteViewModel(application: Application) : AndroidViewModel(application) {
     // on below line we are creating a variable
     // for our all notes list and repository
-    val allNotes : LiveData<List<Note>>
-    val repository : NoteRepository
+    private val allNotes : LiveData<List<Note>>
+    private val repository : NoteRepository
 
     // on below line we are initializing
     // our dao, repository and all notes

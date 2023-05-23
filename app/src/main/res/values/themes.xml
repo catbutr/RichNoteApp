@@ -1,4 +1,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="DefaultRecyclerViewStyle">
+        <item name="android:background">@color/gray</item>
+    </style>
     <!-- Base application theme. -->
     <style name="Theme.NoteApp" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <!-- Primary brand color. -->
@@ -16,4 +20,93 @@
         <item name="materialDrawerHeaderStyle">@style/Widget.MaterialDrawerHeaderStyle</item>
     </style>
 
+    <style name="Theme.NoteApp.Red" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/PrimaryRed</item>
+        <item name="colorPrimaryVariant">@color/PrimaryVariantRed</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="recyclerViewStyle">@style/DefaultRecyclerViewStyle</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/SecondaryRed</item>
+        <item name="colorSecondaryVariant">@color/SecondaryVariantRed</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">@color/SecondaryRed</item>
+        <!-- Customize your theme here. -->
+        <item name="materialDrawerStyle">@style/Widget.MaterialDrawerStyle</item>
+        <item name="materialDrawerHeaderStyle">@style/Widget.MaterialDrawerHeaderStyle</item>
+        <item name ="colorSurface">@color/SecondaryRed</item>
+    </style>
+
+    <style name="Theme.NoteApp.Blue" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/PrimaryBlue</item>
+        <item name="colorPrimaryVariant">@color/PrimaryVariantBlue</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="recyclerViewStyle">@style/DefaultRecyclerViewStyle</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/SecondaryBlue</item>
+        <item name="colorSecondaryVariant">@color/SecondaryVariantBlue</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">#1976D2</item>
+        <!-- Customize your theme here. -->
+        <item name="materialDrawerStyle">@style/Widget.MaterialDrawerStyle</item>
+        <item name="materialDrawerHeaderStyle">@style/Widget.MaterialDrawerHeaderStyle</item>
+        <item name ="colorSurface">#0097A7</item>
+    </style>
+
+    <style name="Theme.NoteApp.Green" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/PrimaryGreen</item>
+        <item name="colorPrimaryVariant">@color/PrimaryVariantGreen</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="recyclerViewStyle">@style/DefaultRecyclerViewStyle</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/SecondaryGreen</item>
+        <item name="colorSecondaryVariant">@color/SecondaryVariantGreen</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">@color/SecondaryGreen</item>
+        <!-- Customize your theme here. -->
+        <item name="materialDrawerStyle">@style/Widget.MaterialDrawerStyle</item>
+        <item name="materialDrawerHeaderStyle">@style/Widget.MaterialDrawerHeaderStyle</item>
+        <item name ="colorSurface">@color/PrimaryGreen</item>
+    </style>
+
+    <style name="Theme.NoteApp.Yellow" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/PrimaryYellow</item>
+        <item name="colorPrimaryVariant">@color/PrimaryVariantYellow</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="recyclerViewStyle">@style/DefaultRecyclerViewStyle</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/SecondaryYellow</item>
+        <item name="colorSecondaryVariant">@color/SecondaryVariantYellow</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">@color/SecondaryYellow</item>
+        <!-- Customize your theme here. -->
+        <item name="materialDrawerStyle">@style/Widget.MaterialDrawerStyle</item>
+        <item name="materialDrawerHeaderStyle">@style/Widget.MaterialDrawerHeaderStyle</item>
+        <item name ="colorSurface">@color/PrimaryYellow</item>
+    </style>
+
+    <style name="Theme.NoteApp.Orange" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/PrimaryOrange</item>
+        <item name="colorPrimaryVariant">@color/PrimaryVariantOrange</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="recyclerViewStyle">@style/DefaultRecyclerViewStyle</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/SecondaryOrange</item>
+        <item name="colorSecondaryVariant">@color/SecondaryVariantOrange</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">@color/SecondaryOrange</item>
+        <!-- Customize your theme here. -->
+        <item name="materialDrawerStyle">@style/Widget.MaterialDrawerStyle</item>
+        <item name="materialDrawerHeaderStyle">@style/Widget.MaterialDrawerHeaderStyle</item>
+        <item name ="colorSurface">@color/PrimaryOrange</item>
+    </style>
 </resources>

@@ -3,14 +3,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- action button for color picker -->
-    <item android:title="colorPicker"
+    <item android:title="@string/colorpicker"
         android:id="@+id/colorPicker"
         android:orderInCategory="100"
         app:showAsAction="ifRoom"
         android:icon="@drawable/picker_icon"/>
 
     <!-- action button for save -->
-    <item android:title="save"
+    <item android:title="@string/save"
         android:id="@+id/save"
         android:orderInCategory="100"
         app:showAsAction="ifRoom"
