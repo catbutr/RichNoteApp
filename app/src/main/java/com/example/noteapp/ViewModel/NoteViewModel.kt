@@ -30,11 +30,20 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
         repository.delete(note)
     }
 
+    fun deleteAllNotesFromNotebook(notebookName: String)= viewModelScope.launch(Dispatchers.IO){
+        repository.deleteAllNotesFromNotebook(notebookName)
+    }
+
     // on below line we are creating a new method for updating a note. In this we are
     // calling a update method from our repository to update our note.
     fun updateNote(note: Note) = viewModelScope.launch(Dispatchers.IO) {
         repository.update(note)
     }
+
+    fun replaceNotebookTitle(notebookName:String,newName:String) =
+        viewModelScope.launch(Dispatchers.IO){
+            repository.replaceNotebookTitle(notebookName,newName)
+        }
 
 
     // on below line we are creating a new method for adding a new note to our database

@@ -3,6 +3,14 @@
     <style name="DefaultRecyclerViewStyle">
         <item name="android:background">@color/gray</item>
     </style>
+
+    <style name="VT323" parent="@android:style/TextAppearance.Medium">
+        <item name="android:fontFamily">@font/vt323_regular</item>
+    </style>
+
+    <style name="Roboto" parent="@android:style/TextAppearance.Medium">
+        <item name="android:fontFamily">@font/roboto_regular</item>
+    </style>
     <!-- Base application theme. -->
     <style name="Theme.NoteApp" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <!-- Primary brand color. -->
@@ -19,7 +27,7 @@
         <item name="materialDrawerStyle">@style/Widget.MaterialDrawerStyle</item>
         <item name="materialDrawerHeaderStyle">@style/Widget.MaterialDrawerHeaderStyle</item>
     </style>
-
+    <!-- Color variations. -->
     <style name="Theme.NoteApp.Red" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/PrimaryRed</item>

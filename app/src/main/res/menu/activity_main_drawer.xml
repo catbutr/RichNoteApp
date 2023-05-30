@@ -5,7 +5,7 @@
 
     <group
         android:checkableBehavior="single"
-        android:id="@+id/nav_notebooks">
+        android:id="@+id/nav_main_notebook">
         <item
             android:orderInCategory="0"
             android:id="@+id/nav_my_notes"
@@ -14,9 +14,23 @@
 
     <group
         android:checkableBehavior="single"
-        android:id="@+id/nav_divider">
+        android:id="@+id/nav_notebooks">
         <item
             android:orderInCategory="1"
+            android:id="@+id/nav_test"
+            android:title="TEST" />
+    </group>
+
+    <group
+        android:checkableBehavior="single"
+        android:id="@+id/nav_divider">
+        <item
+            android:orderInCategory="2"
+            android:id="@+id/nav_change_notebook"
+            android:title="@string/main_change_notebook"
+            />
+        <item
+            android:orderInCategory="2"
             android:id="@+id/nav_new_notebook"
             android:title="@string/main_create_new_notebook"
             />
@@ -27,9 +41,17 @@
         android:id="@+id/nav_settings_group"
         android:title="@string/main_settings">
             <item
-                android:orderInCategory="2"
+                android:orderInCategory="3"
                 android:id="@+id/nav_settings"
                 android:title="@string/main_settings" />
+            <item
+            android:orderInCategory="3"
+            android:id="@+id/nav_theme"
+            android:title="@string/nav_change_theme" />
+            <item
+            android:orderInCategory="3"
+            android:id="@+id/nav_change_font"
+            android:title="@string/nav_change_font" />
     </group>
 
 </menu>

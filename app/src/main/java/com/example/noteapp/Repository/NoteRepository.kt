@@ -11,9 +11,16 @@ class NoteRepository(private val noteDAO: NoteDAO) {
         return noteDAO.getAllNotesFromNotebook(notebookName)
     }
 
+    fun deleteAllNotesFromNotebook(notebookName:String){
+        noteDAO.deleteAllNotesFromNotebook(notebookName)
+    }
+
     fun searchDatabaseByTitle(notebookName:String,searchQuery: String):LiveData<List<Note>>{
         return noteDAO.searchDatabaseByTitle(notebookName,searchQuery)
+    }
 
+    fun replaceNotebookTitle(notebookName:String,newName:String){
+        noteDAO.replaceNotebookTitle(notebookName,newName)
     }
 
     suspend fun insert(note: Note) {

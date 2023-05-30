@@ -10,7 +10,8 @@ import com.example.noteapp.Model.Note
 
 class NoteRVAdapter(
     private val noteClickDeleteInterface: NoteClickDeleteInterface,
-    private val noteClickInterface: NoteClickInterface
+    private val noteClickInterface: NoteClickInterface,
+    private val selectedFont:Int
 ):
     RecyclerView.Adapter<NoteRVAdapter.ViewHolder>()
 {
@@ -39,7 +40,9 @@ class NoteRVAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         // on below line we are setting data to item of recycler view.
         holder.noteTV.text = allNotes[position].noteTitle
+        holder.noteTV.setTextAppearance(selectedFont)
         holder.dateTV.text = "Last Updated : " + allNotes[position].dateTime
+        holder.dateTV.setTextAppearance(selectedFont)
         // on below line we are adding click listener to our delete image view icon.
         holder.deleteIV.setOnClickListener {
             // on below line we are calling a note click

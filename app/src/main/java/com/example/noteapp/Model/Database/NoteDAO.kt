@@ -12,8 +12,14 @@ interface NoteDAO {
     @Query("SELECT * FROM notes WHERE notebook = :notebookName")
     fun getAllNotesFromNotebook(notebookName:String):LiveData<List<Note>>
 
+    @Query("DELETE FROM notes WHERE notebook = :notebookName")
+    fun deleteAllNotesFromNotebook(notebookName:String)
+
     @Query("SELECT * FROM notes WHERE notebook = :notebookName AND title LIKE :searchQuery")
     fun searchDatabaseByTitle(notebookName:String, searchQuery: String):LiveData<List<Note>>
+
+    @Query("UPDATE notes SET notebook = replace(notebook,:notebookName,:newName)")
+    fun replaceNotebookTitle(notebookName:String,newName:String)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(note: Note)

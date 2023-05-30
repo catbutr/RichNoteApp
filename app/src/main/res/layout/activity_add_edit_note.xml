@@ -275,8 +275,8 @@
     <!--edit text for note description-->
     <jp.wasabeef.richeditor.RichEditor
         android:id="@+id/idEdtNoteDesc"
-        android:layout_width="500dp"
-        android:layout_height="500dp"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
         android:layout_margin="10dp"
         android:gravity="start|top"
         android:hint="@string/editor_hint"
