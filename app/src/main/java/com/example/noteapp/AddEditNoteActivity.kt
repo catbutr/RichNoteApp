@@ -27,7 +27,7 @@ import com.jaredrummler.android.colorpicker.ColorShape
 import jp.wasabeef.richeditor.RichEditor
 import java.text.DateFormat.getDateTimeInstance
 import java.util.*
-
+//TODO:Установить новую версию Rich Editor
 @Suppress("DEPRECATION")
 class AddEditNoteActivity : AppCompatActivity(), ColorPickerDialogListener {
     private lateinit var imageUri: Uri
@@ -67,7 +67,9 @@ class AddEditNoteActivity : AppCompatActivity(), ColorPickerDialogListener {
                 val outputFile = this.filesDir.resolve((0..100000).random().toString())
                 contentResolver.openInputStream(imageUri)?.copyTo(outputFile.outputStream())
                 imageUri = outputFile.toUri()
-                noteEdt.insertImage(imageUri.toString(), "Test", 320)
+                noteEdt.insertImage(imageUri.toString(), "ERROR",
+                    "320","320",
+                    true)
             }
         }
 
@@ -79,7 +81,7 @@ class AddEditNoteActivity : AppCompatActivity(), ColorPickerDialogListener {
                 val outputFile = this.filesDir.resolve((0..100000).random().toString())
                 contentResolver.openInputStream(videoUri)?.copyTo(outputFile.outputStream())
                 videoUri = outputFile.toUri()
-                noteEdt.insertVideo(videoUri.toString(), 320, 320)
+                noteEdt.insertVideo(videoUri.toString(), "ERROR", "320","320")
             }
         }
 
@@ -97,6 +99,9 @@ class AddEditNoteActivity : AppCompatActivity(), ColorPickerDialogListener {
 
     @SuppressLint("IntentReset")
     override fun onCreate(savedInstanceState: Bundle?) {
+        val theme = intent.getIntExtra("selectedTheme",0)
+        val font = intent.getIntExtra("selectedFont",0)
+        setTheme(theme)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_edit_note)
         //Initialising cache
@@ -105,9 +110,9 @@ class AddEditNoteActivity : AppCompatActivity(), ColorPickerDialogListener {
             this,
             ViewModelProvider.AndroidViewModelFactory.getInstance(application)
         )[NoteViewModel::class.java]
-
         // on below line we are initializing all our variables.
         noteTitleEdt = findViewById(R.id.idEdtNoteName)
+        noteTitleEdt.setTextAppearance(font)
         noteEdt = findViewById(R.id.idEdtNoteDesc)
         //on below we are initialising rich editor
         noteEdt.setEditorHeight(200)
@@ -121,17 +126,17 @@ class AddEditNoteActivity : AppCompatActivity(), ColorPickerDialogListener {
 
         findViewById<View>(R.id.action_redo).setOnClickListener { noteEdt.redo() }
 
-        findViewById<View>(R.id.action_bold).setOnClickListener { noteEdt.setBold() }
+        findViewById<View>(R.id.action_bold).setOnClickListener { noteEdt.toggleBold() }
 
-        findViewById<View>(R.id.action_italic).setOnClickListener { noteEdt.setItalic() }
+        findViewById<View>(R.id.action_italic).setOnClickListener { noteEdt.toggleItalic() }
 
         findViewById<View>(R.id.action_subscript).setOnClickListener { noteEdt.setSubscript() }
 
         findViewById<View>(R.id.action_superscript).setOnClickListener{ noteEdt.setSuperscript() }
 
-        findViewById<View>(R.id.action_strikethrough).setOnClickListener{ noteEdt.setStrikeThrough() }
+        findViewById<View>(R.id.action_strikethrough).setOnClickListener{ noteEdt.toggleStrikeThrough() }
 
-        findViewById<View>(R.id.action_underline).setOnClickListener{ noteEdt.setUnderline() }
+        findViewById<View>(R.id.action_underline).setOnClickListener{ noteEdt.toggleUnderline() }
 
         findViewById<View>(R.id.action_heading1).setOnClickListener { noteEdt.setHeading(1) }
 
@@ -277,14 +282,14 @@ class AddEditNoteActivity : AppCompatActivity(), ColorPickerDialogListener {
                 // Here you get get input text from the Edittext
                 hyperlinkText = inputLinkField.text.toString()
                 titleText = inputTextFiled.text.toString()
-                noteEdt.insertLink(hyperlinkText, titleText)
+                noteEdt.insertLink(hyperlinkText, titleText,titleText)
             }
             myAlertDialog.setNegativeButton("Cancel"
             ) { dialog, _ -> dialog.cancel() }
 
             myAlertDialog.show()
         }
-        findViewById<View>(R.id.action_insert_checkbox).setOnClickListener { noteEdt.insertTodo() }
+        findViewById<View>(R.id.action_insert_checkbox).setOnClickListener { noteEdt.insertCheckbox()}
 
 
         // on below line we are getting data passed via an intent.

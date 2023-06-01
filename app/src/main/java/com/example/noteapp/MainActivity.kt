@@ -23,7 +23,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
 //TODO:Найти причину почему динамически созданные элементы отказывают делать элемент
 // изменения видимым
-//TODO:Исправить баг с дублированием блокнотов при пересоздании
+@Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity(), NoteClickInterface, SearchView.OnQueryTextListener,
     NoteClickDeleteInterface, NavigationView.OnNavigationItemSelectedListener {
 
@@ -35,11 +35,11 @@ class MainActivity : AppCompatActivity(), NoteClickInterface, SearchView.OnQuery
     private lateinit var drawerLayout:DrawerLayout
     private lateinit var actionBarDrawerToggle: ActionBarDrawerToggle
     //Working variables
+    private var selectedTheme:Int = R.style.Theme_NoteApp
     private var selectedNotebook:String = "My Notes"
     private var addedDrawerMenuItems = mutableListOf<String>()
     private var selectedFont = R.style.Roboto
-    private val noteRVAdapter = NoteRVAdapter(this, this,
-        selectedFont)
+    private lateinit var noteRVAdapter:NoteRVAdapter
     private var latestSelectedNotebookID = R.id.nav_my_notes
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putString("selectedNotebook", selectedNotebook)
@@ -52,21 +52,18 @@ class MainActivity : AppCompatActivity(), NoteClickInterface, SearchView.OnQuery
         super.onRestoreInstanceState(savedInstanceState)
         selectedNotebook = savedInstanceState.getString("selectedNotebook").toString()
         selectedFont = savedInstanceState.getInt("selectedFont")
-        val newItems = savedInstanceState.getStringArrayList("newItems")
-        if (newItems!!.isNotEmpty()) {
-            for (i in newItems.indices) {
-                navigationView.menu.add(R.id.nav_notebooks, (0..10000000).random(), 1, newItems[i])
-            }
-        }
-        addedDrawerMenuItems=newItems
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         //Data store
         val sharedPref = getPreferences(Context.MODE_PRIVATE)
         val chosenTheme = sharedPref.getInt("chosenTheme", MODE_PRIVATE)
+        selectedFont = sharedPref.getInt("selectedFont", MODE_PRIVATE)
+        noteRVAdapter = NoteRVAdapter(this, this,
+            selectedFont)
         setTheme(chosenTheme)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        val currentSpace = this
         // drawer layout instance to toggle the menu icon to open
         // drawer and back button to close drawer
         drawerLayout = findViewById(R.id.nav_view)
@@ -78,6 +75,7 @@ class MainActivity : AppCompatActivity(), NoteClickInterface, SearchView.OnQuery
         // to make the Navigation drawer icon always appear on the action bar
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         val navView = findViewById<NavigationView>(R.id.nav_view2)
+        navView.setItemTextAppearance(selectedFont)
         navView.setNavigationItemSelectedListener(this)
         navView.menu.findItem(R.id.nav_change_notebook).isVisible = false
         val savedNotebooks = sharedPref.getStringSet("notebooks",null)
@@ -129,6 +127,9 @@ class MainActivity : AppCompatActivity(), NoteClickInterface, SearchView.OnQuery
         intent.putExtra("noteId", note.id)
         intent.putExtra("noteColor",note.backgroundColor)
         intent.putExtra("selectedNotebook",selectedNotebook)
+        intent.putExtra("selectedTheme", sharedPref.getInt("chosenTheme", MODE_PRIVATE))
+        intent.putExtra("selectedFont",selectedFont)
+        Toast.makeText(this, selectedTheme.toString(), Toast.LENGTH_SHORT).show()
         startActivity(intent)
         this.finish()
     }
@@ -148,6 +149,7 @@ class MainActivity : AppCompatActivity(), NoteClickInterface, SearchView.OnQuery
         val themeChoice = arrayOf<CharSequence>("Standard", "Red","Blue",
             "Green","Yellow","Orange",
         "Purple")
+        val fontChoice = arrayOf<CharSequence>("Roboto","Aldrich","Garamond","PTSans","Stencil")
         val navView = findViewById<NavigationView>(R.id.nav_view2)
 //        val viewModel = ViewModelProvider(
 //            this,
@@ -264,10 +266,48 @@ class MainActivity : AppCompatActivity(), NoteClickInterface, SearchView.OnQuery
 
             }
             R.id.nav_change_font->{
-                selectedFont = R.style.VT323
-                changeMainFont(selectedFont)
-                myEdit.putInt("selectedFont", selectedFont).apply()
-                uploadNotesToRecyclerView(noteRVAdapter,viewModel,selectedNotebook)
+                val myAlertDialog: AlertDialog.Builder = AlertDialog.Builder(this)
+                myAlertDialog.setTitle("Select Font")
+                myAlertDialog.setItems(fontChoice){_, item ->
+                    when{
+                        fontChoice[item] == "Roboto" -> {
+                            selectedFont = R.style.Roboto
+                            myEdit.putInt("selectedFont", selectedFont).apply()
+                            changeMainFont(selectedFont)
+                            uploadNotesToRecyclerView(noteRVAdapter,viewModel,selectedNotebook)
+                            recreate()
+                        }
+                        fontChoice[item] == "Aldrich" -> {
+                            selectedFont = R.style.Aldrich
+                            myEdit.putInt("selectedFont", selectedFont).apply()
+                            changeMainFont(selectedFont)
+                            uploadNotesToRecyclerView(noteRVAdapter,viewModel,selectedNotebook)
+                            recreate()
+                        }
+                        fontChoice[item] == "Garamond" -> {
+                            selectedFont = R.style.Garamond
+                            myEdit.putInt("selectedFont", selectedFont).apply()
+                            changeMainFont(selectedFont)
+                            uploadNotesToRecyclerView(noteRVAdapter,viewModel,selectedNotebook)
+                            recreate()
+                        }
+                        fontChoice[item] == "PTSans" -> {
+                            selectedFont = R.style.PTSans
+                            myEdit.putInt("selectedFont", selectedFont).apply()
+                            changeMainFont(selectedFont)
+                            uploadNotesToRecyclerView(noteRVAdapter,viewModel,selectedNotebook)
+                            recreate()
+                        }
+                        fontChoice[item] == "Stencil" -> {
+                            selectedFont = R.style.Stencil
+                            myEdit.putInt("selectedFont", selectedFont).apply()
+                            changeMainFont(selectedFont)
+                            uploadNotesToRecyclerView(noteRVAdapter,viewModel,selectedNotebook)
+                            recreate()
+                        }
+                    }
+                }
+                myAlertDialog.show()
             }
             else->{
                 latestSelectedNotebookID = item.itemId

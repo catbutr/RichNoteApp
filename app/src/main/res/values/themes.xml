@@ -4,13 +4,27 @@
         <item name="android:background">@color/gray</item>
     </style>
 
-    <style name="VT323" parent="@android:style/TextAppearance.Medium">
-        <item name="android:fontFamily">@font/vt323_regular</item>
+    <!-- Fonts. -->
+    <style name="Aldrich" parent="@android:style/TextAppearance.Medium">
+        <item name="android:fontFamily">@font/aldrich_cyrillic</item>
     </style>
 
     <style name="Roboto" parent="@android:style/TextAppearance.Medium">
         <item name="android:fontFamily">@font/roboto_regular</item>
     </style>
+
+    <style name="Garamond" parent="@android:style/TextAppearance.Medium">
+        <item name="android:fontFamily">@font/garamond_regular</item>
+    </style>
+
+    <style name="Stencil" parent="@android:style/TextAppearance.Medium">
+        <item name="android:fontFamily">@font/stencil_bt</item>
+    </style>
+
+    <style name="PTSans" parent="@android:style/TextAppearance.Medium">
+        <item name="android:fontFamily">@font/ptsans_regular</item>
+    </style>
+
     <!-- Base application theme. -->
     <style name="Theme.NoteApp" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <!-- Primary brand color. -->

@@ -41,6 +41,14 @@ android {
         jvmTarget = '1.8'
     }
 }
+
+task submodulesUpdate(type: Exec) {
+    description 'fetch richeditor'
+    description 'Updates (and inits) git submodules'
+    commandLine 'git', 'submodule', 'update', '--init', '--recursive', '--remote'
+    group 'Build Setup'
+}
+
 dependencies {
     implementation "androidx.appcompat:appcompat:1.6.1"
     implementation "androidx.activity:activity-ktx:$rootProject.activityVersion"
@@ -83,9 +91,9 @@ dependencies {
     implementation "androidx.navigation:navigation-dynamic-features-fragment:$nav_version"
 
     //Rich Editor
-    implementation 'com.github.bumptech.glide:glide:4.11.0'
+    implementation 'com.github.bumptech.glide:glide:4.15.1'
     implementation 'com.github.chinalwb:are:0.2.1'
-    implementation 'jp.wasabeef:richeditor-android:2.0.0'
+    implementation project(':richeditor')
 
     // image loading library Glide itself
     implementation 'com.github.bumptech.glide:glide:4.15.1'
@@ -102,6 +110,6 @@ dependencies {
     implementation "androidx.datastore:datastore-preferences:1.0.0"
 
     //JSON
-    implementation 'com.google.code.gson:gson:2.8.8'
+    implementation 'com.google.code.gson:gson:2.9.0'
 
 }
