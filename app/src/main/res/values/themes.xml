@@ -17,8 +17,8 @@
         <item name="android:fontFamily">@font/garamond_regular</item>
     </style>
 
-    <style name="Stencil" parent="@android:style/TextAppearance.Medium">
-        <item name="android:fontFamily">@font/stencil_bt</item>
+    <style name="Montserrat" parent="@android:style/TextAppearance.Medium">
+        <item name="android:fontFamily">@font/montserrat_regular</item>
     </style>
 
     <style name="PTSans" parent="@android:style/TextAppearance.Medium">

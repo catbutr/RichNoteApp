@@ -1,13 +1,9 @@
 package com.example.noteapp
 
-import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
@@ -18,29 +14,33 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.noteapp.Model.Note
-import com.example.noteapp.ViewModel.NoteViewModel
+import com.example.noteapp.utils.FontUtil
+import com.example.noteapp.utils.NoteViewModelUtil
+import com.example.noteapp.utils.NotebookUtil
+import com.example.noteapp.utils.ThemeUtil
+import com.example.noteapp.viewModel.DataManager
+import com.example.noteapp.viewModel.NoteViewModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
-//TODO:Найти причину почему динамически созданные элементы отказывают делать элемент
-// изменения видимым
 @Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity(), NoteClickInterface, SearchView.OnQueryTextListener,
     NoteClickDeleteInterface, NavigationView.OnNavigationItemSelectedListener {
 
     //ViewModel
-    private lateinit var viewModel: NoteViewModel
+    lateinit var viewModel: NoteViewModel
     //UI elements
-    private lateinit var notesRV: RecyclerView
+    lateinit var notesRV: RecyclerView
     private lateinit var addFAB: FloatingActionButton
     private lateinit var drawerLayout:DrawerLayout
     private lateinit var actionBarDrawerToggle: ActionBarDrawerToggle
     //Working variables
-    private var selectedTheme:Int = R.style.Theme_NoteApp
-    private var selectedNotebook:String = "My Notes"
-    private var addedDrawerMenuItems = mutableListOf<String>()
-    private var selectedFont = R.style.Roboto
-    private lateinit var noteRVAdapter:NoteRVAdapter
-    private var latestSelectedNotebookID = R.id.nav_my_notes
+    var selectedTheme:Int = R.style.Theme_NoteApp
+    var selectedNotebook:String = "My Notes"
+    var addedDrawerMenuItems = mutableListOf<String>()
+    var selectedFont = R.style.Roboto
+    lateinit var noteRVAdapter:NoteRVAdapter
+    var latestSelectedNotebookID = R.id.nav_my_notes
+    var isAsc:Boolean = false
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putString("selectedNotebook", selectedNotebook)
         outState.putStringArrayList("newItems",java.util.ArrayList(addedDrawerMenuItems))
@@ -48,22 +48,22 @@ class MainActivity : AppCompatActivity(), NoteClickInterface, SearchView.OnQuery
         super.onSaveInstanceState(outState)
     }
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        val navigationView = findViewById<NavigationView>(R.id.nav_view2)
         super.onRestoreInstanceState(savedInstanceState)
         selectedNotebook = savedInstanceState.getString("selectedNotebook").toString()
         selectedFont = savedInstanceState.getInt("selectedFont")
+        addedDrawerMenuItems = savedInstanceState.getStringArrayList("newItems")!!.toMutableList()
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         //Data store
-        val sharedPref = getPreferences(Context.MODE_PRIVATE)
-        val chosenTheme = sharedPref.getInt("chosenTheme", MODE_PRIVATE)
-        selectedFont = sharedPref.getInt("selectedFont", MODE_PRIVATE)
+        val prefs = DataManager(this)
+        selectedTheme = prefs.getValue_int("chosenTheme")
+        selectedFont = prefs.getValue_int("selectedFont")
+        isAsc = prefs.getValue_boolean("isAsc")!!
         noteRVAdapter = NoteRVAdapter(this, this,
             selectedFont)
-        setTheme(chosenTheme)
+        setTheme(selectedTheme)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val currentSpace = this
         // drawer layout instance to toggle the menu icon to open
         // drawer and back button to close drawer
         drawerLayout = findViewById(R.id.nav_view)
@@ -74,18 +74,17 @@ class MainActivity : AppCompatActivity(), NoteClickInterface, SearchView.OnQuery
         actionBarDrawerToggle.syncState()
         // to make the Navigation drawer icon always appear on the action bar
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        val navView = findViewById<NavigationView>(R.id.nav_view2)
+        val navView: NavigationView = findViewById<NavigationView>(R.id.nav_view2)
         navView.setItemTextAppearance(selectedFont)
         navView.setNavigationItemSelectedListener(this)
         navView.menu.findItem(R.id.nav_change_notebook).isVisible = false
-        val savedNotebooks = sharedPref.getStringSet("notebooks",null)
-        val savedNotebooksList = savedNotebooks!!.toMutableList()
-        addedDrawerMenuItems.addAll(savedNotebooksList)
+        val savedNotebooks = prefs.getValue_stringSet("notebooks")!!.toMutableList()
         if (savedNotebooks.isNotEmpty()) {
             for (i in savedNotebooks.indices) {
-                navView.menu.add(R.id.nav_notebooks, (0..10000000).random(), 1, savedNotebooksList[i])
+                navView.menu.add(R.id.nav_notebooks, (0..10000000).random(), 1, savedNotebooks[i])
             }
         }
+        addedDrawerMenuItems.addAll(savedNotebooks)
         //on below line we are initializing all our variables.
         notesRV = findViewById(R.id.notesRV)
         addFAB = findViewById(R.id.idFAB)
@@ -98,14 +97,12 @@ class MainActivity : AppCompatActivity(), NoteClickInterface, SearchView.OnQuery
             this,
             ViewModelProvider.AndroidViewModelFactory.getInstance(application)
         )[NoteViewModel::class.java]
-        Toast.makeText(this, intent.getStringExtra("lastNotebook")
-            .toString() + " in main",Toast.LENGTH_SHORT).show()
+        val vmUtil = NoteViewModelUtil(viewModel,this, this)
         if (intent.getBooleanExtra("viewFlag",false)) {
             selectedNotebook = intent.getStringExtra("previousNotebook").toString()
-            Toast.makeText(this, "$selectedNotebook is current notebook in main", Toast.LENGTH_LONG).show()
         }
         //on below line we are calling all notes method from our view modal class to observer the changes on list.
-        uploadNotesToRecyclerView(noteRVAdapter,viewModel,selectedNotebook)
+        vmUtil.uploadNotesToRecyclerView(noteRVAdapter,viewModel,selectedNotebook,isAsc)
         addFAB.setOnClickListener {
             //adding a click listener for fab button and opening a new intent to add a new note.
             val intent = Intent(this@MainActivity, AddEditNoteActivity::class.java)
@@ -116,9 +113,8 @@ class MainActivity : AppCompatActivity(), NoteClickInterface, SearchView.OnQuery
     }
 
     override fun onNoteClick(note: Note) {
-        val sharedPref = getPreferences(Context.MODE_PRIVATE)
-        val myEdit: SharedPreferences.Editor = sharedPref.edit()
-        myEdit.putStringSet("notebooks",HashSet(addedDrawerMenuItems)).apply()
+        val prefs = DataManager(this)
+        prefs.setValue_stringSet("notebooks",HashSet(addedDrawerMenuItems))
         //opening a new intent and passing a data to it.
         val intent = Intent(this@MainActivity, AddEditNoteActivity::class.java)
         intent.putExtra("noteType", "Edit")
@@ -126,9 +122,10 @@ class MainActivity : AppCompatActivity(), NoteClickInterface, SearchView.OnQuery
         intent.putExtra("noteDescription", note.noteText)
         intent.putExtra("noteId", note.id)
         intent.putExtra("noteColor",note.backgroundColor)
-        intent.putExtra("selectedNotebook",selectedNotebook)
-        intent.putExtra("selectedTheme", sharedPref.getInt("chosenTheme", MODE_PRIVATE))
+        intent.putExtra("selectedNotebook",note.noteBook)
+        intent.putExtra("selectedTheme", prefs.getValue_int("chosenTheme"))
         intent.putExtra("selectedFont",selectedFont)
+        intent.putExtra("isFavourite",note.isFavourite)
         Toast.makeText(this, selectedTheme.toString(), Toast.LENGTH_SHORT).show()
         startActivity(intent)
         this.finish()
@@ -143,181 +140,57 @@ class MainActivity : AppCompatActivity(), NoteClickInterface, SearchView.OnQuery
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         val noteRVAdapter = NoteRVAdapter(this, this,selectedFont)
+        val vmUtil = NoteViewModelUtil(viewModel,this,this)
         notesRV.adapter = noteRVAdapter
-        val sharedPref = getPreferences(Context.MODE_PRIVATE)
-        val myEdit: SharedPreferences.Editor = sharedPref.edit()
-        val themeChoice = arrayOf<CharSequence>("Standard", "Red","Blue",
-            "Green","Yellow","Orange",
-        "Purple")
-        val fontChoice = arrayOf<CharSequence>("Roboto","Aldrich","Garamond","PTSans","Stencil")
         val navView = findViewById<NavigationView>(R.id.nav_view2)
-//        val viewModel = ViewModelProvider(
-//            this,
-//            ViewModelProvider.AndroidViewModelFactory.getInstance(application)
-//        )[NoteViewModel::class.java]
+        val notebookUtil = NotebookUtil(navView,this,this,this)
         when (item.itemId)
         {
-            R.id.nav_theme-> {
-                val myAlertDialog: AlertDialog.Builder = AlertDialog.Builder(this)
-                myAlertDialog.setTitle("Select Theme")
-                myAlertDialog.setItems(themeChoice) { _, item ->
-                    when {
-                        themeChoice[item] == "Standard" -> {
-                            myEdit.putInt("chosenTheme", R.style.Theme_NoteApp).apply()
-                            setTheme(R.style.Theme_NoteApp)
-                            recreate()
-                        }
-                        themeChoice[item] == "Red" -> {
-                            myEdit.putInt("chosenTheme", R.style.Theme_NoteApp_Red).apply()
-                            setTheme(R.style.Theme_NoteApp)
-                            recreate()
-                        }
-                        themeChoice[item] == "Blue" -> {
-                            myEdit.putInt("chosenTheme", R.style.Theme_NoteApp_Blue).apply()
-                            setTheme(R.style.Theme_NoteApp)
-                            recreate()
-                        }
-                        themeChoice[item] == "Green" -> {
-                            myEdit.putInt("chosenTheme", R.style.Theme_NoteApp_Green).apply()
-                            setTheme(R.style.Theme_NoteApp)
-                            recreate()
-                        }
-                        themeChoice[item] == "Yellow" -> {
-                            myEdit.putInt("chosenTheme", R.style.Theme_NoteApp_Yellow).apply()
-                            setTheme(R.style.Theme_NoteApp)
-                            recreate()
-                        }
-                        themeChoice[item] == "Orange" -> {
-                            myEdit.putInt("chosenTheme", R.style.Theme_NoteApp_Orange).apply()
-                            setTheme(R.style.Theme_NoteApp)
-                            recreate()
-                        }
-                        themeChoice[item] == "Purple" -> {
-                            myEdit.putInt("chosenTheme", R.style.Theme_NoteApp_Purple).apply()
-                            setTheme(R.style.Theme_NoteApp)
-                            recreate()
-                        }
-                    }
-                }
-                myAlertDialog.show()
-            }
             R.id.nav_new_notebook-> {
-                val currentLayout = LayoutInflater.from(this)
-                val newLayout = currentLayout.inflate(R.layout.edit_dialogue, null)
-                val dialogBuilder = AlertDialog.Builder(this)
-                dialogBuilder.setView(newLayout)
-                val userInput = newLayout.findViewById<EditText>(R.id.input_text)
-                dialogBuilder.setCancelable(false)
-                dialogBuilder.setPositiveButton("OK") { _, _ ->
-                    addNewNotebook(userInput.text.toString()) }
-                dialogBuilder.setNegativeButton("Cancel") { dialog, _ ->
-                    dialog.cancel()}
-                dialogBuilder.show()
+                notebookUtil.addNotebook()
             }
             R.id.nav_my_notes->{
                 navView.menu.findItem(R.id.nav_change_notebook).isVisible = false
-                updateRecyclerView(item,noteRVAdapter)
+                vmUtil.updateRecyclerView(item,noteRVAdapter,isAsc)
                 Toast.makeText(this,"Nav_My_Notes",Toast.LENGTH_SHORT).show()
             }
-            R.id.nav_settings->{
-                val myAlertDialog: AlertDialog.Builder = AlertDialog.Builder(this)
-                myAlertDialog.setTitle("Do you really want to delete the notebook" +
-                        "and all the notes?")
-                myAlertDialog.setPositiveButton("Accept") {_, _ ->
-                    removeNotebook(selectedNotebook)
-                    viewModel.deleteAllNotesFromNotebook(selectedNotebook)
-                    selectedNotebook = "My Notes"
-                    uploadNotesToRecyclerView(noteRVAdapter,viewModel,selectedNotebook)
-                }
-                myAlertDialog.setNegativeButton("Cancel"){_, _ -> }
-                myAlertDialog.show()
+            R.id.nav_delete_notebook->{
+                notebookUtil.removeNotebook()
             }
             R.id.nav_change_notebook->{
-                val currentLayout = LayoutInflater.from(this)
-                val newLayout = currentLayout.inflate(R.layout.edit_dialogue, null)
-                val dialogBuilder = AlertDialog.Builder(this)
-                dialogBuilder.setView(newLayout)
-                val userInput = newLayout.findViewById<EditText>(R.id.input_text)
-                dialogBuilder.setCancelable(false)
-                dialogBuilder.setPositiveButton("OK") { _, _ ->
-                    val newText = userInput.text.toString()
-                    var isDuplicateInList = false
-                    for (i in addedDrawerMenuItems.indices){
-                        if (newText == addedDrawerMenuItems[i]){
-                            Toast.makeText(this,"THIS NOTEBOOK ALREADY EXIST",
-                                Toast.LENGTH_SHORT).show()
-                            isDuplicateInList = true
-                            break
-                        }
-                    }
-                    Toast.makeText(this,isDuplicateInList.toString(),Toast.LENGTH_SHORT).show()
-                    if (!isDuplicateInList){
-                    viewModel.replaceNotebookTitle(selectedNotebook,newText)
-                    removeNotebook(selectedNotebook)
-                    addNewNotebook(newText)
-                    selectedNotebook = newText
-                    uploadNotesToRecyclerView(noteRVAdapter,viewModel,selectedNotebook)
-                    }
-                }
-                dialogBuilder.setNegativeButton("Cancel") { dialog, _ ->
-                    dialog.cancel()
-                }
-                dialogBuilder.show()
-
+                notebookUtil.renameNotebook()
             }
-            R.id.nav_change_font->{
+            R.id.nav_settings->{
+                val themeSettings = ThemeUtil(this,this)
+                val fontSetting = FontUtil(this,this,this)
                 val myAlertDialog: AlertDialog.Builder = AlertDialog.Builder(this)
-                myAlertDialog.setTitle("Select Font")
-                myAlertDialog.setItems(fontChoice){_, item ->
+                myAlertDialog.setTitle("Select settings")
+                val settingsChoice = arrayOf<CharSequence>("Change theme","Change font","Cancel")
+                myAlertDialog.setItems(settingsChoice){_, item ->
                     when{
-                        fontChoice[item] == "Roboto" -> {
-                            selectedFont = R.style.Roboto
-                            myEdit.putInt("selectedFont", selectedFont).apply()
-                            changeMainFont(selectedFont)
-                            uploadNotesToRecyclerView(noteRVAdapter,viewModel,selectedNotebook)
-                            recreate()
+                        settingsChoice[item] == "Change font"->{
+                            fontSetting.selectingFont()
                         }
-                        fontChoice[item] == "Aldrich" -> {
-                            selectedFont = R.style.Aldrich
-                            myEdit.putInt("selectedFont", selectedFont).apply()
-                            changeMainFont(selectedFont)
-                            uploadNotesToRecyclerView(noteRVAdapter,viewModel,selectedNotebook)
-                            recreate()
-                        }
-                        fontChoice[item] == "Garamond" -> {
-                            selectedFont = R.style.Garamond
-                            myEdit.putInt("selectedFont", selectedFont).apply()
-                            changeMainFont(selectedFont)
-                            uploadNotesToRecyclerView(noteRVAdapter,viewModel,selectedNotebook)
-                            recreate()
-                        }
-                        fontChoice[item] == "PTSans" -> {
-                            selectedFont = R.style.PTSans
-                            myEdit.putInt("selectedFont", selectedFont).apply()
-                            changeMainFont(selectedFont)
-                            uploadNotesToRecyclerView(noteRVAdapter,viewModel,selectedNotebook)
-                            recreate()
-                        }
-                        fontChoice[item] == "Stencil" -> {
-                            selectedFont = R.style.Stencil
-                            myEdit.putInt("selectedFont", selectedFont).apply()
-                            changeMainFont(selectedFont)
-                            uploadNotesToRecyclerView(noteRVAdapter,viewModel,selectedNotebook)
-                            recreate()
+                        settingsChoice[item] == "Change theme"->{
+                            themeSettings.changingThemeDialog()
                         }
                     }
                 }
                 myAlertDialog.show()
+            }
+            R.id.nav_favourites->{
+                latestSelectedNotebookID = item.itemId
+                Toast.makeText(this,item.title.toString() + item.itemId.toString(),
+                    Toast.LENGTH_SHORT).show()
+                navView.menu.findItem(R.id.nav_change_notebook).isVisible = true
+                vmUtil.updateFavouritesRecyclerView(item,noteRVAdapter)
             }
             else->{
                 latestSelectedNotebookID = item.itemId
                 Toast.makeText(this,item.title.toString() + item.itemId.toString(),
                     Toast.LENGTH_SHORT).show()
                 navView.menu.findItem(R.id.nav_change_notebook).isVisible = true
-                updateRecyclerView(item,noteRVAdapter)
-//                val testID = item.itemId.toString()
-//                Toast.makeText(this,testID,Toast.LENGTH_SHORT).show()
-//                Toast.makeText(this,"Else",Toast.LENGTH_SHORT).show()
+                vmUtil.updateRecyclerView(item,noteRVAdapter,isAsc)
             }
         }
         return true
@@ -329,8 +202,33 @@ class MainActivity : AppCompatActivity(), NoteClickInterface, SearchView.OnQuery
         menuInflater.inflate(R.menu.activity_main_action_bar, menu)
         val search = menu.findItem(R.id.menu_search)
         val searchView = search?.actionView as? SearchView
+        val sorting = menu.findItem(R.id.date_sort)
+        if(!isAsc){
+            sorting.setIcon(R.drawable.sort_desc)
+        }
+        else{
+            sorting.setIcon(R.drawable.sort_asc)
+        }
         searchView?.setOnQueryTextListener(this)
         return super.onCreateOptionsMenu(menu)
+    }
+    override fun onOptionsItemSelected(item: MenuItem): Boolean{
+        val vmUtil = NoteViewModelUtil(viewModel,this,this)
+        when (item.itemId){
+            R.id.date_sort->{
+                if(!isAsc){
+                    isAsc = true
+                    item.setIcon(R.drawable.sort_asc)
+                    vmUtil.updateRecyclerViewForActionBar(selectedNotebook,isAsc)
+                }
+                else{
+                    isAsc = false
+                    item.setIcon(R.drawable.sort_desc)
+                    vmUtil.updateRecyclerViewForActionBar(selectedNotebook,isAsc)
+                }
+            }
+        }
+        return true
     }
 
     override fun onQueryTextSubmit(query: String?): Boolean {
@@ -338,70 +236,10 @@ class MainActivity : AppCompatActivity(), NoteClickInterface, SearchView.OnQuery
     }
 
     override fun onQueryTextChange(query: String?): Boolean {
+        val vmUtil = NoteViewModelUtil(viewModel,this, this)
         if(query != null){
-            searchDatabase(selectedNotebook,query)
+            vmUtil.searchDatabase(selectedNotebook,query)
         }
         return true
     }
-
-    private fun addNewNotebook(title:String)
-    {
-        val sharedPref = getPreferences(Context.MODE_PRIVATE)
-        val myEdit: SharedPreferences.Editor = sharedPref.edit()
-        val navView = findViewById<NavigationView>(R.id.nav_view2)
-        addedDrawerMenuItems.add(title)
-        myEdit.putStringSet("notebooks",HashSet(addedDrawerMenuItems)).apply()
-        val existingMenu = navView.menu
-        existingMenu.add(R.id.nav_notebooks, (0..10000000).random(),1,title)
-    }
-
-    private fun removeNotebook(title:String)
-    {
-        val navView = findViewById<NavigationView>(R.id.nav_view2)
-        val sharedPref = getPreferences(Context.MODE_PRIVATE)
-        val myEdit: SharedPreferences.Editor = sharedPref.edit()
-        addedDrawerMenuItems.remove(title)
-        navView.menu.removeItem(latestSelectedNotebookID)
-        myEdit.putStringSet("notebooks",HashSet(addedDrawerMenuItems)).apply()
-    }
-
-
-    // We have just created this function for searching our database
-    private fun searchDatabase(notebook:String, query: String) {
-        // %" "% because our custom sql query will require that
-        val searchQuery = "%$query%"
-        notesRV.adapter = noteRVAdapter
-
-        viewModel.searchDatabaseByTitle(notebook,searchQuery).observe(this) { list ->
-            list.let {
-                noteRVAdapter.updateList(it)
-            }
-        }
-    }
-
-    private fun updateRecyclerView(item:MenuItem, noteRVAdapter: NoteRVAdapter){
-        viewModel.getAllNotesFromNotebook(item.title.toString()).observe(this) { list ->
-            list?.let {
-                //on below line we are updating our list.
-                noteRVAdapter.updateList(it)
-                selectedNotebook = item.title.toString()
-            }
-        }
-    }
-
-    private fun uploadNotesToRecyclerView(noteRVAdapter: NoteRVAdapter,
-                                          viewModel:NoteViewModel, selectedNotebook:String){
-        viewModel.getAllNotesFromNotebook(selectedNotebook).observe(this) { list ->
-            list?.let {
-                //on below line we are updating our list.
-                noteRVAdapter.updateList(it)
-            }
-        }
-    }
-
-    private fun changeMainFont(styleID:Int){
-        val navView = findViewById<NavigationView>(R.id.nav_view2)
-        navView.setItemTextAppearance(styleID)
-    }
-
 }

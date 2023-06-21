@@ -1,10 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:are="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".AddEditNoteActivity">
+    <data>
+        <variable
+            name="scrollViewHandler"
+            type="com.example.noteapp.viewModel.ScrollViewHandler" />
+        <variable
+            name="noteEdt"
+            type="jp.wasabeef.richeditor.RichEditor" />
+        <variable
+            name="activity"
+            type="com.example.noteapp.AddEditNoteActivity" />
+
+    </data>
+<LinearLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:are="http://schemas.android.com/apk/res-auto"
-    tools:context=".AddEditNoteActivity"
     android:orientation="vertical">
 
     <!--edit text for note title-->
@@ -34,6 +48,7 @@
                 android:layout_height="48dp"
                 android:background="@null"
                 android:contentDescription="@null"
+                android:onClick="@{()->scrollViewHandler.undo(noteEdt)}"
                 android:src="@drawable/undo" />
 
             <ImageButton
@@ -42,6 +57,7 @@
                 android:layout_height="48dp"
                 android:background="@null"
                 android:contentDescription="@null"
+                android:onClick="@{()->scrollViewHandler.redo(noteEdt)}"
                 android:src="@drawable/redo" />
 
             <ImageButton
@@ -50,6 +66,7 @@
                 android:layout_height="48dp"
                 android:background="@null"
                 android:contentDescription="@null"
+                android:onClick="@{()->scrollViewHandler.setBold(noteEdt)}"
                 android:src="@drawable/bold_white" />
 
             <ImageButton
@@ -58,6 +75,7 @@
                 android:layout_height="48dp"
                 android:background="@null"
                 android:contentDescription="@null"
+                android:onClick="@{()->scrollViewHandler.setItalic(noteEdt)}"
                 android:src="@drawable/italic_white" />
 
             <ImageButton
@@ -66,6 +84,7 @@
                 android:layout_height="48dp"
                 android:background="@null"
                 android:contentDescription="@null"
+                android:onClick="@{()->scrollViewHandler.setSubscript(noteEdt)}"
                 android:src="@drawable/subscript_white" />
 
             <ImageButton
@@ -74,6 +93,7 @@
                 android:layout_height="48dp"
                 android:background="@null"
                 android:contentDescription="@null"
+                android:onClick="@{()->scrollViewHandler.setSuperscript(noteEdt)}"
                 android:src="@drawable/superscript_white" />
 
             <ImageButton
@@ -82,6 +102,7 @@
                 android:layout_height="48dp"
                 android:background="@null"
                 android:contentDescription="@null"
+                android:onClick="@{()->scrollViewHandler.setStrikeThrough(noteEdt)}"
                 android:src="@drawable/strikethrough_white" />
 
             <ImageButton
@@ -90,6 +111,7 @@
                 android:layout_height="48dp"
                 android:background="@null"
                 android:contentDescription="@null"
+                android:onClick="@{()->scrollViewHandler.setUnderline(noteEdt)}"
                 android:src="@drawable/underline_white" />
 
             <ImageButton
@@ -98,6 +120,7 @@
                 android:layout_height="48dp"
                 android:background="@null"
                 android:contentDescription="@null"
+                android:onClick="@{()->scrollViewHandler.setHeading(noteEdt,1)}"
                 android:src="@drawable/h1" />
 
             <ImageButton
@@ -106,6 +129,7 @@
                 android:layout_height="48dp"
                 android:background="@null"
                 android:contentDescription="@null"
+                android:onClick="@{()->scrollViewHandler.setHeading(noteEdt,2)}"
                 android:src="@drawable/h2" />
 
             <ImageButton
@@ -114,6 +138,7 @@
                 android:layout_height="48dp"
                 android:background="@null"
                 android:contentDescription="@null"
+                android:onClick="@{()->scrollViewHandler.setHeading(noteEdt,3)}"
                 android:src="@drawable/h3" />
 
             <ImageButton
@@ -122,6 +147,7 @@
                 android:layout_height="48dp"
                 android:background="@null"
                 android:contentDescription="@null"
+                android:onClick="@{()->scrollViewHandler.setHeading(noteEdt,4)}"
                 android:src="@drawable/h4" />
 
             <ImageButton
@@ -130,6 +156,7 @@
                 android:layout_height="48dp"
                 android:background="@null"
                 android:contentDescription="@null"
+                android:onClick="@{()->scrollViewHandler.setHeading(noteEdt,5)}"
                 android:src="@drawable/h5" />
 
             <ImageButton
@@ -138,6 +165,7 @@
                 android:layout_height="48dp"
                 android:background="@null"
                 android:contentDescription="@null"
+                android:onClick="@{()->scrollViewHandler.setHeading(noteEdt,6)}"
                 android:src="@drawable/h6" />
 
             <ImageButton
@@ -146,6 +174,7 @@
                 android:layout_height="48dp"
                 android:background="@null"
                 android:contentDescription="@null"
+                android:onClick="@{()->scrollViewHandler.setTextColor(activity)}"
                 android:src="@drawable/txt_color" />
 
             <ImageButton
@@ -154,6 +183,7 @@
                 android:layout_height="48dp"
                 android:background="@null"
                 android:contentDescription="@null"
+                android:onClick="@{()->scrollViewHandler.setBackgroundTextColor(noteEdt,activity)}"
                 android:src="@drawable/bg_color" />
 
 
@@ -163,6 +193,7 @@
                 android:layout_height="48dp"
                 android:background="@null"
                 android:contentDescription="@null"
+                android:onClick="@{()->scrollViewHandler.setIndent(noteEdt)}"
                 android:src="@drawable/indent" />
 
             <ImageButton
@@ -171,6 +202,7 @@
                 android:layout_height="48dp"
                 android:background="@null"
                 android:contentDescription="@null"
+                android:onClick="@{()->scrollViewHandler.setOutdent(noteEdt)}"
                 android:src="@drawable/outdent" />
 
             <ImageButton
@@ -179,6 +211,7 @@
                 android:layout_height="48dp"
                 android:background="@null"
                 android:contentDescription="@null"
+                android:onClick="@{()->scrollViewHandler.setAlign(noteEdt,1)}"
                 android:src="@drawable/justify_left" />
 
             <ImageButton
@@ -187,6 +220,7 @@
                 android:layout_height="48dp"
                 android:background="@null"
                 android:contentDescription="@null"
+                android:onClick="@{()->scrollViewHandler.setAlign(noteEdt,2)}"
                 android:src="@drawable/justify_center" />
 
             <ImageButton
@@ -195,6 +229,7 @@
                 android:layout_height="48dp"
                 android:background="@null"
                 android:contentDescription="@null"
+                android:onClick="@{()->scrollViewHandler.setAlign(noteEdt,3)}"
                 android:src="@drawable/justify_right" />
 
             <ImageButton
@@ -203,6 +238,7 @@
                 android:layout_height="48dp"
                 android:background="@null"
                 android:contentDescription="@null"
+                android:onClick="@{()->scrollViewHandler.setBullets(noteEdt)}"
                 android:src="@drawable/bullets" />
 
             <ImageButton
@@ -211,6 +247,7 @@
                 android:layout_height="48dp"
                 android:background="@null"
                 android:contentDescription="@null"
+                android:onClick="@{()->scrollViewHandler.setNumbers(noteEdt)}"
                 android:src="@drawable/numbers" />
 
             <ImageButton
@@ -219,6 +256,7 @@
                 android:layout_height="48dp"
                 android:background="@null"
                 android:contentDescription="@null"
+                android:onClick="@{()->scrollViewHandler.setBlockQuote(noteEdt)}"
                 android:src="@drawable/blockquote" />
 
             <ImageButton
@@ -227,6 +265,7 @@
                 android:layout_height="48dp"
                 android:background="@null"
                 android:contentDescription="@null"
+                android:onClick="@{()->scrollViewHandler.insertImage(context)}"
                 android:src="@drawable/insert_image" />
 
             <ImageButton
@@ -235,6 +274,7 @@
                 android:layout_height="48dp"
                 android:background="@null"
                 android:contentDescription="@null"
+                android:onClick="@{()->scrollViewHandler.insertAudio(context)}"
                 android:src="@drawable/music" />
 
             <ImageButton
@@ -243,6 +283,7 @@
                 android:layout_height="48dp"
                 android:background="@null"
                 android:contentDescription="@null"
+                android:onClick="@{()->scrollViewHandler.insertVideo(context)}"
                 android:src="@drawable/video_white" />
 
             <ImageButton
@@ -251,6 +292,7 @@
                 android:layout_height="48dp"
                 android:background="@null"
                 android:contentDescription="@null"
+                android:onClick="@{()->scrollViewHandler.insertYoutubeLink(noteEdt,context)}"
                 android:src="@drawable/youtube" />
 
             <ImageButton
@@ -259,6 +301,7 @@
                 android:layout_height="48dp"
                 android:background="@null"
                 android:contentDescription="@null"
+                android:onClick="@{()->scrollViewHandler.insertLink(noteEdt,context)}"
                 android:src="@drawable/insert_link" />
 
             <ImageButton
@@ -267,7 +310,18 @@
                 android:layout_height="48dp"
                 android:background="@null"
                 android:contentDescription="@null"
+                android:onClick="@{()->scrollViewHandler.setTodo(noteEdt)}"
                 android:src="@android:drawable/checkbox_on_background" />
+
+            <ImageButton
+                android:id="@+id/action_font"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@null"
+                android:contentDescription="@null"
+                android:onClick="@{()->scrollViewHandler.changeFont(noteEdt,context)}"
+                android:src="@drawable/insert_link"
+                />
 
         </LinearLayout>
     </HorizontalScrollView>
@@ -287,3 +341,4 @@
 
 
 </LinearLayout>
+</layout>

@@ -15,8 +15,6 @@
   </a>
 </p>
 
-This is a fork, which tries to merge changes from [Andrew-Chen-Wang/RichEditorView](https://github.com/Andrew-Chen-Wang/RichEditorView) 
-
 `RichEditor for Android` is a beautiful Rich Text `WYSIWYG Editor` for `Android`.
 
 - _Looking for iOS? Check out_ [cjwirth/RichEditorView](https://github.com/cjwirth/RichEditorView)
@@ -26,7 +24,6 @@ Supported Functions
 
 ![Toolbar](./art/demo.gif)
 
-- [x] (new?) Remove Format
 - [x] Bold
 - [x] Italic
 - [x] Subscript
@@ -37,7 +34,6 @@ Supported Functions
 - [x] Justify Center
 - [x] Justify Right
 - [x] Blockquote
-- [x] (new) Pre-Section
 - [x] Heading 1
 - [x] Heading 2
 - [x] Heading 3
@@ -48,28 +44,17 @@ Supported Functions
 - [x] Redo
 - [x] Indent
 - [x] Outdent
-- [x] (new) Insert HTML Code
-- [x] (new) Insert Horizontal Line
 - [x] Insert Image
-- [x] (new) Insert Inline Image
 - [x] Insert Youtube
 - [x] Insert Video
 - [x] Insert Audio
 - [x] Insert Link
 - [x] Checkbox
 - [x] Text Color
-- [x] (new) Text Color (String)
 - [x] Text Background Color
-- [x] (new) Text Background Color (String)
-- [x] (new) Font Family
 - [x] Text Font Size
 - [x] Unordered List (Bullets)
 - [x] Ordered List (Numbers)
-- [x] (new) Get Selected Text
-- [x] (new) Get Selected Href
-- [x] (new) Table
-- [x] (new) Collapsible Section
-- [x] (new) Run and acquire data direct from JavaScript (requestJSData)
 
 Attribute change of editor
 ---
@@ -79,9 +64,11 @@ Attribute change of editor
 - [x] Height
 - [x] Placeholder
 - [x] Load CSS
-- [x] (new) Load Font
-- [x] (new) getFontFamily
-- [x] State Callback 
+- [x] State Callback
+
+**Milestone**
+
+- [ ] Font Family
 
 Demo
 ---
@@ -94,26 +81,14 @@ How do I use it?
 ### Setup
 
 ##### Gradle
-
-~~repositories {~~
-   ~~mavenCentral()~~
-~~}~~
-
-~~dependencies {~~
-  ~~implementation 'jp.wasabeef:richeditor-android:2.0.0'~~
-~~}~~
-
 ```groovy
-
-dependencies {
-  implementation files('../../richeditor-android/richeditor/build/outputs/aar/richeditor-debug.aar')
+repositories {
+  mavenCentral()
 }
 
-settings.gradle
-
-includeBuild('../richeditor-android')
-
-
+dependencies {
+  implementation 'jp.wasabeef:richeditor-android:2.0.0'
+}
 ```
 ### Default Setting for Editor
 ---
@@ -148,9 +123,7 @@ editor.setPlaceholder("Insert text here...");
 ```
 
 **Others**  
-Please refer
-the [samples](https://github.com/niendo1/richeditor-android/blob/master/sample/src/main/java/jp/wasabeef/sample/MainActivity.java)
-for usage.
+Please refer the [samples](https://github.com/wasabeef/richeditor-android/blob/master/sample/src/main/java/jp/wasabeef/sample/MainActivity.java) for usage.
 
 ### Functions for ContentEditable
 ---
@@ -173,7 +146,7 @@ editor.insertImage("https://raw.githubusercontent.com/wasabeef/art/master/twitte
 **Text Change Listener**
 ```java
 RichEditor editor = (RichEditor) findViewById(R.id.editor);
-editor.setOnTextChangeListener(new RichEditor.OnTextChangeListener() {
+editor. setOnTextChangeListener(new RichEditor.OnTextChangeListener() {
   @Override
   public void onTextChange(String text) {
     // Do Something
@@ -183,34 +156,30 @@ editor.setOnTextChangeListener(new RichEditor.OnTextChangeListener() {
 ```
 
 **Others**  
-Please refer
-the [samples](https://github.com/niendo1/richeditor-android/blob/master/sample/src/main/java/jp/wasabeef/sample/MainActivity.java)
-for usage.
+Please refer the [samples](https://github.com/wasabeef/richeditor-android/blob/master/sample/src/main/java/jp/wasabeef/sample/MainActivity.java) for usage.
 
 Requirements
 --------------
-Android 7+ (Level 24)
+Android 4+
 
 Applications using RichEditor for Android
 ---
 
-Please [ping](mailto:peter@niendo.de) me or send a pull request if you would like to be added here.
+Please [ping](mailto:dadadada.chop@gmail.com) me or send a pull request if you would like to be added here.
 
-| Icon                                                                                                                                               | Application                                                                         |
-|----------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|
-| <img src="https://lh6.ggpht.com/6zKH_uQY1bxCwXL4DLo_uoFEOXdShi3BgmN6XRHlaJ-oA1svmq6y1PZkmO50nWQn2Lg=w300-rw" width="48" height="48" />             | [Ameba Ownd](https://play.google.com/store/apps/details?id=jp.co.cyberagent.madrid) |
-| <img src="https://lh3.googleusercontent.com/st_DiIlM148vzG23ccujtBzx0tMeb7cDC5fDmLSERS-Nr8M_F-PTw4W_jWJsH9mO_b4=w300-rw" width="48" height="48" /> | [ScorePal](https://play.google.com/store/apps/details?id=com.hfd.scorepal)          |
-| <img src="https://github.com/niendo1/ImapNotes3/blob/master/fastlane/metadata/android/en-US/images/icon.png" width="48" height="48" />             | [ImapNotes3](https://f-droid.org/packages/de.niendo.ImapNotes3/)                    |
+Icon | Application
+------------ | -------------
+<img src="https://lh6.ggpht.com/6zKH_uQY1bxCwXL4DLo_uoFEOXdShi3BgmN6XRHlaJ-oA1svmq6y1PZkmO50nWQn2Lg=w300-rw" width="48" height="48" /> | [Ameba Ownd](https://play.google.com/store/apps/details?id=jp.co.cyberagent.madrid)
+<img src="https://lh3.googleusercontent.com/st_DiIlM148vzG23ccujtBzx0tMeb7cDC5fDmLSERS-Nr8M_F-PTw4W_jWJsH9mO_b4=w300-rw" width="48" height="48" /> | [ScorePal](https://play.google.com/store/apps/details?id=com.hfd.scorepal)
 
 Developed By
 -------
 Daichi Furiya (Wasabeef) - <dadadada.chop@gmail.com>
 
 <a href="https://twitter.com/wasabeef_jp">
-<img alt="Follow me on Twitter" src="https://raw.githubusercontent.com/wasabeef/art/master/twitter.png" width="75"/>
+<img alt="Follow me on Twitter"
+src="https://raw.githubusercontent.com/wasabeef/art/master/twitter.png" width="75"/>
 </a>
-
-Peter Korf (niendo) - <peter@niendo.de>
 
 Thanks
 -------
@@ -220,7 +189,6 @@ Thanks
 License
 -------
 
-    Copyright (C) 2022-2023 niendo
     Copyright (C) 2020 Wasabeef
 
     Licensed under the Apache License, Version 2.0 (the "License");

@@ -5,7 +5,6 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
@@ -13,26 +12,18 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
-import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Copyright (C) 2022-2023 niendo
- * Copyright (C) 2017 Kishan Jadav
  * Copyright (C) 2020 Wasabeef
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -48,44 +39,50 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * limitations under the License.
  */
 
-public class RichEditor extends WebView implements ValueCallback<String> {
+public class RichEditor extends WebView {
 
   public enum Type {
-    BOLD, ITALIC, SUBSCRIPT, SUPERSCRIPT, STRIKETHROUGH, UNDERLINE, H1, H2, H3, H4, H5, H6, HTML, HR, ORDEREDLIST, UNORDEREDLIST, JUSTIFYCENTER, JUSTIFYFULL, JUSTIFYLEFT, JUSTIFYRIGHT
-  }
-
-  private final AtomicBoolean mEvaluateFinished = new AtomicBoolean(false);
-
-  public interface onJSDataListener  {
-    public void onDataReceived(String value);
-    //public void onActionFailure(Throwable throwableError);
-  }
-
-  public interface onClickListener  {
-    public void onClick(String value);
-    //public void onActionFailure(Throwable throwableError);
+    BOLD,
+    ITALIC,
+    SUBSCRIPT,
+    SUPERSCRIPT,
+    STRIKETHROUGH,
+    UNDERLINE,
+    H1,
+    H2,
+    H3,
+    H4,
+    H5,
+    H6,
+    ORDEREDLIST,
+    UNORDEREDLIST,
+    JUSTIFYCENTER,
+    JUSTIFYFULL,
+    JUSTIFYLEFT,
+    JUSTIFYRIGHT
   }
 
   public interface OnTextChangeListener {
-        void onTextChange(String text);
+
+    void onTextChange(String text);
   }
 
   public interface OnDecorationStateListener {
+
     void onStateChangeListener(String text, List<Type> types);
   }
 
   public interface AfterInitialLoadListener {
+
     void onAfterInitialLoad(boolean isReady);
   }
 
-  private static final String SETUP_HTML = "file:///android_asset/rich_editor.html";
+  private static final String SETUP_HTML = "file:///android_asset/editor.html";
   private static final String CALLBACK_SCHEME = "re-callback://";
   private static final String STATE_SCHEME = "re-state://";
-  private static final String CLICK_SCHEME= "re-click://";
   private boolean isReady = false;
+  private String mContents;
   private OnTextChangeListener mTextChangeListener;
-  private onClickListener mClickListener;
-  private onJSDataListener mJSDataListener;
   private OnDecorationStateListener mDecorationStateListener;
   private AfterInitialLoadListener mLoadListener;
 
@@ -119,14 +116,6 @@ public class RichEditor extends WebView implements ValueCallback<String> {
     mTextChangeListener = listener;
   }
 
-  public void setOnClickListener(onClickListener listener) {
-    mClickListener = listener;
-  }
-
-  public void setOnJSDataListener(onJSDataListener listener) {
-    mJSDataListener = listener;
-  }
-
   public void setOnDecorationChangeListener(OnDecorationStateListener listener) {
     mDecorationStateListener = listener;
   }
@@ -135,37 +124,10 @@ public class RichEditor extends WebView implements ValueCallback<String> {
     mLoadListener = listener;
   }
 
-  @Override public void onReceiveValue(String value) {
-
-    String unescaped= null;
-    try {
-      unescaped = URLDecoder.decode(value, "UTF-8");
-    } catch (UnsupportedEncodingException e) {
-      e.printStackTrace();
-    }
-    if (!"null".equals(unescaped)) {
-
-      unescaped = unescaped.substring(1, unescaped.length() - 1)  // remove wrapping quotes
-        .replace("\\\\", "\\")        // unescape \\ -> \
-        .replace("\\\"", "\"")        // unescape \" -> "
-        .replace("\\u003C", "<");    // unescape \u003c" -> <
-    }
-
-    if (mJSDataListener != null) {
-      mJSDataListener.onDataReceived(unescaped);
-    }
-  }
-  
-   private void callback(String value) {
-
+  private void callback(String text) {
+    mContents = text.replaceFirst(CALLBACK_SCHEME, "");
     if (mTextChangeListener != null) {
-      mTextChangeListener.onTextChange(value.replaceFirst(CALLBACK_SCHEME, ""));
-    }
-  }
-
-  private void callback_click(String value) {
-    if (mClickListener != null) {
-      mClickListener.onClick(value.replaceFirst(CLICK_SCHEME, ""));
+      mTextChangeListener.onTextChange(mContents);
     }
   }
 
@@ -184,7 +146,7 @@ public class RichEditor extends WebView implements ValueCallback<String> {
   }
 
   private void applyAttributes(Context context, AttributeSet attrs) {
-    final int[] attrsArray = new int[] {
+    final int[] attrsArray = new int[]{
       android.R.attr.gravity
     };
     TypedArray ta = context.obtainStyledAttributes(attrs, attrsArray);
@@ -227,46 +189,11 @@ public class RichEditor extends WebView implements ValueCallback<String> {
     } catch (UnsupportedEncodingException e) {
       // No handling
     }
+    mContents = contents;
   }
 
   public String getHtml() {
-      requestJSData("RE.getHtml()");
-      return("data can only received by callback");
-  }
-
-  /// Text representation of the data that has been input into the editor view, if it has been loaded.
-  public boolean getText() {
-    return requestJSData("RE.getText()");
-  }
-
-  /// Returns selected text
-  public boolean getSelectedText() {
-    return requestJSData("RE.selectedText()");
-  }
-
-  /// Returns HTML-Code from selected range
-  public boolean getSelectedHtml() {
-    return requestJSData("RE.selectedHtml()");
-  }
-
-  /// The href of the current selection, if the current selection's parent is an anchor tag.
-  /// Will be nil if there is no href, or it is an empty string.
-  public boolean getSelectedHref() {
-    if (!hasRangeSelection()) {
-      return false;
-    } else {
-      return requestJSData("RE.getSelectedHref()");
-    }
-  }
-
-  /// Whether or not the selection has a type specifically of "Range".
-  public boolean hasRangeSelection() {
-    return requestJSData("RE.rangeSelectionExists()");
-  }
-
-  /// Whether or not the selection has a type specifically of "Range" or "Caret".
-  public boolean hasRangeOrCaretSelection() {
-    return requestJSData("RE.rangeOrCaretSelectionExists()");
+    return mContents;
   }
 
   public void setEditorFontColor(int color) {
@@ -303,7 +230,7 @@ public class RichEditor extends WebView implements ValueCallback<String> {
   @Override
   public void setBackgroundResource(int resid) {
     Bitmap bitmap = Utils.decodeResource(getContext(), resid);
-    String base64 = Utils.toBase64(bitmap, "png");
+    String base64 = Utils.toBase64(bitmap);
     bitmap.recycle();
 
     exec("javascript:RE.setBackgroundImage('url(data:image/png;base64," + base64 + ")');");
@@ -312,7 +239,7 @@ public class RichEditor extends WebView implements ValueCallback<String> {
   @Override
   public void setBackground(Drawable background) {
     Bitmap bitmap = Utils.toBitmap(background);
-    String base64 = Utils.toBase64(bitmap,"png");
+    String base64 = Utils.toBase64(bitmap);
     bitmap.recycle();
 
     exec("javascript:RE.setBackgroundImage('url(data:image/png;base64," + base64 + ")');");
@@ -331,7 +258,7 @@ public class RichEditor extends WebView implements ValueCallback<String> {
   }
 
   public void setPlaceholder(String placeholder) {
-    exec("javascript:RE.setPlaceholderText('" + placeholder + "');");
+    exec("javascript:RE.setPlaceholder('" + placeholder + "');");
   }
 
   public void setInputEnabled(Boolean inputEnabled) {
@@ -339,11 +266,15 @@ public class RichEditor extends WebView implements ValueCallback<String> {
   }
 
   public void loadCSS(String cssFile) {
-    String jsCSSImport =
-      "(function() {" + "    var head  = document.getElementsByTagName(\"head\")[0];"
-        + "    var link  = document.createElement(\"link\");" + "    link.rel  = \"stylesheet\";"
-        + "    link.type = \"text/css\";" + "    link.href = \"" + cssFile + "\";"
-        + "    link.media = \"all\";" + "    head.appendChild(link);" + "}) ();";
+    String jsCSSImport = "(function() {" +
+      "    var head  = document.getElementsByTagName(\"head\")[0];" +
+      "    var link  = document.createElement(\"link\");" +
+      "    link.rel  = \"stylesheet\";" +
+      "    link.type = \"text/css\";" +
+      "    link.href = \"" + cssFile + "\";" +
+      "    link.media = \"all\";" +
+      "    head.appendChild(link);" +
+      "}) ();";
     exec("javascript:" + jsCSSImport + "");
   }
 
@@ -355,24 +286,12 @@ public class RichEditor extends WebView implements ValueCallback<String> {
     exec("javascript:RE.redo();");
   }
 
-  public void setPre() {
-    exec("javascript:RE.setPre();");
+  public void setBold() {
+    exec("javascript:RE.setBold();");
   }
 
-  public void toggleBold() {
-    exec("javascript:RE.toggleBold();");
-  }
-
-  public void setBold(boolean enabled) {
-    exec("javascript:RE.setBold(" + enabled + ");");
-  }
-
-  public void toggleItalic() {
-    exec("javascript:RE.toggleItalic();");
-  }
-
-  public void setItalic(boolean enabled) {
-    exec("javascript:RE.setItalic(" + enabled + ");");
+  public void setItalic() {
+    exec("javascript:RE.setItalic();");
   }
 
   public void setSubscript() {
@@ -383,51 +302,26 @@ public class RichEditor extends WebView implements ValueCallback<String> {
     exec("javascript:RE.setSuperscript();");
   }
 
-  public void toggleStrikeThrough() {
-    exec("javascript:RE.toggleStrikeThrough();");
+  public void setStrikeThrough() {
+    exec("javascript:RE.setStrikeThrough();");
   }
 
-  public void setStrikeThrough(boolean enabled) {
-    exec("javascript:RE.setStrikeThrough(" + enabled + ");");
-  }
-
-  public void toggleUnderline() {
-    exec("javascript:RE.toggleUnderline();");
-  }
-
-  public void setUnderline(boolean enabled) {
-    exec("javascript:RE.setUnderline(" + enabled + ");");
+  public void setUnderline() {
+    exec("javascript:RE.setUnderline();");
   }
 
   public void setTextColor(int color) {
-    setTextColor(convertHexColorString(color));
-  }
-
-  public void setTextColor(String color) {
     exec("javascript:RE.prepareInsert();");
-    exec("javascript:RE.setTextColor('" + color + "');");
+
+    String hex = convertHexColorString(color);
+    exec("javascript:RE.setTextColor('" + hex + "');");
   }
 
   public void setTextBackgroundColor(int color) {
-
-    setTextBackgroundColor(convertHexColorString(color));
-  }
-
-  public void setTextBackgroundColor(String color) {
     exec("javascript:RE.prepareInsert();");
-    exec("javascript:RE.setTextBackgroundColor('" + color + "');");
-  }
 
-  public void setFontFamily(String fontFamily) {
-    exec("javascript:RE.setFontFamily('" + fontFamily + "');");
-  }
-
-  public void LoadFont(String name, String url) {
-    exec("javascript:RE.LoadFont('" + name + "','"+url+"');");
-  }
-
-  public void getFontFamily() {
-    requestJSData("javascript:RE.getFontFamily();");
+    String hex = convertHexColorString(color);
+    exec("javascript:RE.setTextBackgroundColor('" + hex + "');");
   }
 
   public void setFontSize(int fontSize) {
@@ -469,90 +363,58 @@ public class RichEditor extends WebView implements ValueCallback<String> {
     exec("javascript:RE.setBlockquote();");
   }
 
-  public void setBullets() { setUnorderedList(); }
-  public void setUnorderedList() { exec("javascript:RE.setUnorderedList();"); }
-
-  public void setNumbers() { setOrderedList(); }
-  public void setOrderedList() { exec("javascript:RE.setOrderedList();"); }
-
-  public void insertHTML(String text) {
-    exec("javascript:RE.prepareInsert();");
-    text = text.replace("\n", "<br>")
-      .replace("\\", "\\\\")
-      .replace("\"", "\\\"");        // unescape \\ -> \
-    exec("javascript:RE.insertHTML('" + text + "');");
+  public void setBullets() {
+    exec("javascript:RE.setBullets();");
   }
 
-  public void insertHR_Line() {
-    exec("javascript:RE.prepareInsert();");
-    exec("javascript:RE.insertHTML('<hr>');");
+  public void setNumbers() {
+    exec("javascript:RE.setNumbers();");
   }
 
-  public void insertCollapsibleSection(String section, String content) {
-    exec("javascript:RE.insertCollapsibleSection('"+section+"', '"+content+"');");
+  public void insertImage(String url, String alt) {
+    exec("javascript:RE.prepareInsert();");
+    exec("javascript:RE.insertImage('" + url + "', '" + alt + "');");
   }
 
   /**
-   * {@link RichEditor#insertImage(String, String, String, String, Boolean)} will show the original size of the image.
+   * the image according to the specific width of the image automatically
+   *
+   * @param url
+   * @param alt
+   * @param width
+   */
+  public void insertImage(String url, String alt, int width) {
+    exec("javascript:RE.prepareInsert();");
+    exec("javascript:RE.insertImageW('" + url + "', '" + alt + "','" + width + "');");
+  }
+
+  /**
+   * {@link RichEditor#insertImage(String, String)} will show the original size of the image.
    * So this method can manually process the image by adjusting specific width and height to fit into different mobile screens.
    *
    * @param url
    * @param alt
-   * @param width    Width of the Image; if relative=true then 100 means 100% page width
-   * @param height   Height of the Image
-   * @param relative Image size is relative to page width
-   */
-  public void insertImage(String url, String alt, String width, String height, Boolean relative) {
-    exec("javascript:RE.prepareInsert();");
-    exec("javascript:RE.insertImage('" + url + "', '" + alt + "','" + width + "', '" + height + "', '" + relative.toString() + "');");
-  }
-
-  /**
-   * {@link RichEditor#insertImageAsBase64(Uri, String, String, String, Boolean, Integer)} will show the original size of the image.
-   * So this method can manually process the image by adjusting specific width and height to fit into different mobile screens.
-   *
-   * @param imageURI
-   * @param alt
-   * @param width        Width of the Image; if relative=true then 100 means 100% page width
-   * @param height       Height of the Image
-   * @param relative     Image size is relative to page width
-   * @param inSampleSize Shrink Image size
-   */
-  public void insertImageAsBase64(Uri imageURI, String alt, String width, String height, Boolean relative, Integer inSampleSize) {
-    InputStream inputStream = null;
-    try {
-      inputStream = getContext().getContentResolver().openInputStream(imageURI);
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-    }
-
-    BitmapFactory.Options options = new BitmapFactory.Options();
-    options.inSampleSize = inSampleSize;
-    Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, options);
-    try {
-      inputStream.close();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    String type = getContext().getContentResolver().getType(imageURI).toLowerCase();
-    String tag = "data:" + type + ";charset=utf-8;base64,";
-    exec("javascript:RE.prepareInsert();");
-    exec("javascript:RE.insertImage('" + tag + Utils.toBase64(bitmap, type) + "','" + alt + "','" + width + "', '" + height + "', '" + relative.toString() + "');");
-    //exec("javascript:RE.insertImage('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==','alt');");
-  }
-
-  /**
-   * {@link RichEditor#insertVideo(String, String, String, String)} will show the original size of the video.
-   * So this method can manually process the image by adjusting specific width and height to fit into different mobile screens.
-   *
-   * @param url
-   * @param alt
-   * @param width Width of the video; auto=100% page width
+   * @param width
    * @param height
    */
-  public void insertVideo(String url, String alt, String width, String height) {
+  public void insertImage(String url, String alt, int width, int height) {
     exec("javascript:RE.prepareInsert();");
-    exec("javascript:RE.insertVideo('" + url + "', '" + alt + "', '" + width + "' '" + height + "');");
+    exec("javascript:RE.insertImageWH('" + url + "', '" + alt + "','" + width + "', '" + height + "');");
+  }
+
+  public void insertVideo(String url) {
+    exec("javascript:RE.prepareInsert();");
+    exec("javascript:RE.insertVideo('" + url + "');");
+  }
+
+  public void insertVideo(String url, int width) {
+    exec("javascript:RE.prepareInsert();");
+    exec("javascript:RE.insertVideoW('" + url + "', '" + width + "');");
+  }
+
+  public void insertVideo(String url, int width, int height) {
+    exec("javascript:RE.prepareInsert();");
+    exec("javascript:RE.insertVideoWH('" + url + "', '" + width + "', '" + height + "');");
   }
 
   public void insertAudio(String url) {
@@ -567,22 +429,22 @@ public class RichEditor extends WebView implements ValueCallback<String> {
 
   public void insertYoutubeVideo(String url, int width) {
     exec("javascript:RE.prepareInsert();");
-    exec("javascript:RE.insertYoutubeVideo('" + url + "', '" + width + "');");
+    exec("javascript:RE.insertYoutubeVideoW('" + url + "', '" + width + "');");
   }
 
   public void insertYoutubeVideo(String url, int width, int height) {
     exec("javascript:RE.prepareInsert();");
-    exec("javascript:RE.insertYoutubeVideo('" + url + "', '" + width + "', '" + height + "');");
+    exec("javascript:RE.insertYoutubeVideoWH('" + url + "', '" + width + "', '" + height + "');");
   }
 
-  public void insertLink(String href, String text, String title) {
+  public void insertLink(String href, String title) {
     exec("javascript:RE.prepareInsert();");
-    exec("javascript:RE.insertLink('" + href + "', '" + text + "', '" + title + "');");
+    exec("javascript:RE.insertLink('" + href + "', '" + title + "');");
   }
 
-  public void insertCheckbox() {
+  public void insertTodo() {
     exec("javascript:RE.prepareInsert();");
-    exec("javascript:RE.setCheckbox();");
+    exec("javascript:RE.setTodo('" + Utils.getCurrentTime() + "');");
   }
 
   public void focusEditor() {
@@ -590,9 +452,16 @@ public class RichEditor extends WebView implements ValueCallback<String> {
     exec("javascript:RE.focus();");
   }
 
-  public void focus(Integer x, Integer y) {
-    requestFocus();
-    exec("javascript:RE.focusAtPoint("+ x.toString() + ", "+ y.toString() + ")");
+  public void LoadFont(String name, String url) {
+    exec("javascript:RE.LoadFont('" + name + "','"+url+"');");
+  }
+
+  public void setFontFamily(String fontFamily) {
+    exec("javascript:RE.setFontFamily('" + fontFamily + "');");
+  }
+
+  public void getFontFamily() {
+    exec("javascript:RE.getFontFamily();");
   }
 
   public void clearFocusEditor() {
@@ -608,38 +477,12 @@ public class RichEditor extends WebView implements ValueCallback<String> {
       load(trigger);
     } else {
       postDelayed(new Runnable() {
-        @Override public void run() {
-           exec(trigger);
+        @Override
+        public void run() {
+          exec(trigger);
         }
       }, 100);
     }
-  }
-
-  // MARK: Table functionalities
-  public void insertTable(Integer col, Integer row) {
-    exec("javascript:RE.prepareInsert()");
-    exec("javascript:RE.insertTable("+ col.toString() + "," + row.toString() + ")");
-  }
-
-  /// Checks if cursor is in a table element. If so, return true so that you can add menu items accordingly.
-  public void isCursorInTable() {
-    requestJSData("javascript:RE.isCursorInTable");
-  }
-
-  public void addRowToTable() {
-    exec("javascript:RE.addRowToTable()");
-  }
-
-  public void deleteRowFromTable() {
-    exec("javascript:RE.deleteRowFromTable()");
-  }
-
-  public void addColumnToTable() {
-    exec("javascript:RE.addColumnToTable()");
-  }
-
-  public void deleteColumnFromTable() {
-    exec("javascript:RE.deleteColumnFromTable()");
   }
 
   private void load(String trigger) {
@@ -648,14 +491,6 @@ public class RichEditor extends WebView implements ValueCallback<String> {
     } else {
       loadUrl(trigger);
     }
-  }
-
-  public boolean requestJSData(String cmdJS) {
-    // https://stackoverflow.com/questions/38380246/espresso-how-to-call-evaluatejavascript-on-a-webview
-    mEvaluateFinished.set(false);
-
-     evaluateJavascript(cmdJS, this);
-     return true;
   }
 
   protected class EditorWebViewClient extends WebViewClient {
@@ -693,9 +528,6 @@ public class RichEditor extends WebView implements ValueCallback<String> {
         return true;
       } else if (TextUtils.indexOf(url, STATE_SCHEME) == 0) {
         stateCheck(decode);
-        return true;
-      } else if (TextUtils.indexOf(url, CLICK_SCHEME) == 0) {
-        callback_click(decode);
         return true;
       }
       return super.shouldOverrideUrlLoading(view, request);

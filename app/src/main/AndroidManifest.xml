@@ -9,7 +9,7 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/bullets"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.NoteApp"
@@ -38,6 +38,7 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+
 
     </application>
 
