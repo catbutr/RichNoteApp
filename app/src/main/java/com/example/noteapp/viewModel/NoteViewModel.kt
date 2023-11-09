@@ -1,4 +1,4 @@
-package com.example.noteapp.ViewModel
+package com.example.noteapp.viewModel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -6,7 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import com.example.noteapp.Model.Database.NoteDatabase
 import com.example.noteapp.Model.Note
-import com.example.noteapp.Repository.NoteRepository
+import com.example.noteapp.repository.NoteRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -52,8 +52,16 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
         repository.insert(note)
     }
 
-    fun getAllNotesFromNotebook(notebookName: String): LiveData<List<Note>> {
-        return repository.allNotesFromNotebook(notebookName)
+    fun getAllNotesFromNotebookDesc(notebookName: String): LiveData<List<Note>> {
+        return repository.allNotesFromNotebookDesc(notebookName)
+    }
+
+    fun getAllNotesFromNotebookAsc(notebookName: String): LiveData<List<Note>> {
+        return repository.allNotesFromNotebookAsc(notebookName)
+    }
+
+    fun getAllFavourite():LiveData<List<Note>>{
+        return repository.allFavourite()
     }
 
     fun searchDatabaseByTitle(notebookName: String,searchQuery: String):LiveData<List<Note>>{

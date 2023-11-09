@@ -26,4 +26,6 @@
     <string name="nav_change_theme">Change theme</string>
     <string name="main_change_notebook">Change notebook</string>
     <string name="nav_change_font">Change font</string>
+    <string name="nav_delete_notebook">Delete notebook</string>
+    <string name="nav_favourites">Favourites</string>
 </resources>

@@ -24,4 +24,6 @@ data class Note(
 ): Parcelable{
     @IgnoredOnParcel
     @PrimaryKey(autoGenerate = true) var id = 0
+    @IgnoredOnParcel
+    var isFavourite = false
 }

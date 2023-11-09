@@ -9,8 +9,14 @@ interface NoteDAO {
     @Query("SELECT * FROM notes ORDER BY date_time DESC")
     fun getAllNotes(): LiveData<List<Note>>
 
-    @Query("SELECT * FROM notes WHERE notebook = :notebookName")
-    fun getAllNotesFromNotebook(notebookName:String):LiveData<List<Note>>
+    @Query("SELECT * FROM notes WHERE notebook = :notebookName ORDER BY date_time DESC")
+    fun getAllNotesFromNotebookByTimeDesc(notebookName:String):LiveData<List<Note>>
+
+    @Query("SELECT * FROM notes WHERE notebook = :notebookName ORDER BY date_time ASC")
+    fun getAllNotesFromNotebookByTimeAsc(notebookName:String):LiveData<List<Note>>
+
+    @Query("SELECT * FROM notes WHERE isFavourite = 1")
+    fun getAllFavourites():LiveData<List<Note>>
 
     @Query("DELETE FROM notes WHERE notebook = :notebookName")
     fun deleteAllNotesFromNotebook(notebookName:String)
